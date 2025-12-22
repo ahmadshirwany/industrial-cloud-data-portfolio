@@ -1,0 +1,127 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables & Secrets
+.env
+.env.local
+.env.*.local
+credentials.json
+credentials.txt
+secrets.json
+service-account-key.json
+private_key.pem
+*.key
+*-key.json
+*service-account*.json
+gcp-*-*.json
+
+# Configuration files (sensitive)
+config.ini
+config.local.json
+docker-compose.local.yml
+.dockerconfigjson
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.postgres
+
+# Logs
+*.log
+logs/
+*.out
+
+# OS
+.DS_Store
+Thumbs.db
+.Directory
+
+# Docker
+.dockerignore
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+.~*
+
+# Build artifacts
+*.tar.gz
+*.zip
+
+# Node (if used)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE specific
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# GCP
+gcp-key.json
+google-credentials.json
+
+# API Keys and Tokens
+*.token
+API_KEY
+AUTH_TOKEN
+JWT_SECRET
+
+# Data files (optional - uncomment if needed)
+# *.csv
+# *.json (be careful with this)
+
+# Cache
+.cache/
+__pycache__/
+.pytest_cache/
+
+# Local development
+local_data/
+temp/
+tmp/

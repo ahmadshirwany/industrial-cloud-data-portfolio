@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  generator:
+    build:
+      context: .
+      dockerfile: services/generator/Dockerfile
+    environment:
+      - GCP_PROJECT_ID=industrial-cloud-data
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/service-account.json
+    volumes:
+      - ./services/generator/config:/app/config:ro
+    restart: unless-stopped
+    container_name: telemetry-generator
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: services/ingestion/Dockerfile
+    environment:
+      - GCP_PROJECT_ID=industrial-cloud-data
+      - GCP_BUCKET_NAME=telemetry-data007
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/service-account.json
+    volumes:
+      - ./services/ingestion/config:/app/config:ro
+    restart: unless-stopped
+    container_name: telemetry-ingestion
+    depends_on:
+      - generator
+
+  transformer:
+    build:
+      context: .
+      dockerfile: services/transformer/Dockerfile
+    environment:
+      - GCP_PROJECT_ID=industrial-cloud-data
+      - GCP_BUCKET_NAME=telemetry-data007
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/service-account.json
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME:-telemetry}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT:-5432}
+    volumes:
+      - ./services/transformer/config:/app/config:ro
+    restart: unless-stopped
+    container_name: telemetry-transformer
+    depends_on:
+      - ingestion
+
+  dashboard-api:
+    build:
+      context: .
+      dockerfile: services/dashboard-api/Dockerfile
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME:-telemetry}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT:-5432}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    container_name: dashboard-api
+    depends_on:
+      - transformer
+
+  dashboard-frontend:
+    build:
+      context: .
+      dockerfile: dashboard-frontend/Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://dashboard-api:8080
+    restart: unless-stopped
+    container_name: dashboard-frontend
+    depends_on:
+      - dashboard-api
