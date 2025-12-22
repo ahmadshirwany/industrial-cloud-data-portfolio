@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Industrial Cloud Dashboard{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    {% block extra_css %}{% endblock %}
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 shadow-2xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🏭</span>
+                    <h1 class="text-2xl font-bold text-white">Industrial Cloud Dashboard</h1>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <a href="/" class="text-white hover:bg-blue-500 hover:bg-opacity-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium">Home</a>
+                    <a href="/dashboard" class="text-white hover:bg-blue-500 hover:bg-opacity-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium">Dashboard</a>
+                    <a href="/servers" class="text-white hover:bg-blue-500 hover:bg-opacity-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium">Servers</a>
+                    <a href="/containers" class="text-white hover:bg-blue-500 hover:bg-opacity-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium">Containers</a>
+                    <a href="/services" class="text-white hover:bg-blue-500 hover:bg-opacity-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium">Services</a>
+                    <a href="/analytics" class="text-white hover:bg-blue-500 hover:bg-opacity-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium">Analytics</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white bg-opacity-80 backdrop-blur border-t border-gray-300 mt-16 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <p class="text-center text-sm font-medium text-gray-700">
+                🏭 Industrial Cloud Telemetry Dashboard • Real-time metrics updated every 30-120 seconds
+            </p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

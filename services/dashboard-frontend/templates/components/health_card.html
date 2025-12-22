@@ -1,0 +1,15 @@
+<!-- Health Card Component - Used by HTMX for dynamic refresh -->
+<div class="p-6 rounded-lg shadow-md" style="background: linear-gradient(135deg, {{ color }} 0%, rgba({{ color_rgb }}, 0.1) 100%)">
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-gray-600 text-sm font-medium">{{ label }}</p>
+            <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ value }}</h3>
+            {% if change %}
+            <p class="text-xs mt-2 {% if change > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                {% if change > 0 %}↑{% else %}↓{% endif %} {{ change }}% from last hour
+            </p>
+            {% endif %}
+        </div>
+        <div class="text-5xl opacity-20">{{ icon }}</div>
+    </div>
+</div>

@@ -28,45 +28,60 @@ async def get_system_health(
     Calculate overall system health score (0-100)
     """
     # Get server health metrics
-    server_query = text("""
+    server_query = text(f"""
         SELECT 
             AVG(cpu_percent) as avg_cpu,
             AVG(memory_percent) as avg_memory,
             AVG(disk_utilization) as avg_disk,
             COUNT(CASE WHEN status = 'critical' THEN 1 END) as critical_servers
         FROM server_metrics
-        WHERE timestamp > NOW() - INTERVAL '1 minute' * :minutes
+        WHERE timestamp > NOW() - INTERVAL '{minutes} minutes'
     """)
     
-    server_result = db.execute(server_query, {"minutes": minutes}).fetchone()
+    server_result = db.execute(server_query).fetchone()
     
     # Get service health metrics
-    service_query = text("""
+    service_query = text(f"""
         SELECT 
             AVG(success_rate) as avg_success_rate,
             AVG(error_rate_percent) as avg_error_rate
         FROM service_metrics
-        WHERE timestamp > NOW() - INTERVAL '1 minute' * :minutes
+        WHERE timestamp > NOW() - INTERVAL '{minutes} minutes'
     """)
     
-    service_result = db.execute(service_query, {"minutes": minutes}).fetchone()
+    service_result = db.execute(service_query).fetchone()
+    
+    avg_cpu = float(server_result[0] or 0)
+    avg_memory = float(server_result[1] or 0)
+    avg_disk = float(server_result[2] or 0)
+    critical_servers = int(server_result[3] or 0)
+    avg_success_rate = float(service_result[0] or 100)  # Default to 100 if no service data
     
     # Calculate health score (100 = perfect)
-    cpu_score = max(0, 100 - (server_result[0] or 0))
-    memory_score = max(0, 100 - (server_result[1] or 0))
-    disk_score = max(0, 100 - (server_result[2] or 0))
-    service_score = (service_result[0] or 100)
-    critical_penalty = (server_result[3] or 0) * 10
+    # Each component contributes 25 points to final score
+    cpu_score = max(0, min(100, 100 - avg_cpu))           # Lower CPU is better
+    memory_score = max(0, min(100, 100 - avg_memory))     # Lower memory is better
+    disk_score = max(0, min(100, 100 - avg_disk))         # Lower disk is better
+    service_score = max(0, min(100, avg_success_rate))    # Higher success rate is better
     
-    overall_score = max(0, (cpu_score + memory_score + disk_score + service_score) / 4 - critical_penalty)
+    # Calculate overall health score as weighted average
+    # Each component gets 25% weight
+    overall_score = (cpu_score * 0.25) + (memory_score * 0.25) + (disk_score * 0.25) + (service_score * 0.25)
+    
+    # Apply critical server penalty (max 20% reduction)
+    if critical_servers > 0:
+        critical_penalty = min(20, critical_servers * 5)  # Up to 20 point penalty
+        overall_score = max(0, overall_score - critical_penalty)
+    
+    overall_score = min(100, max(0, overall_score))
     
     return SystemHealthScore(
         score=round(overall_score, 2),
-        avg_cpu=float(server_result[0] or 0),
-        avg_memory=float(server_result[1] or 0),
-        avg_disk=float(server_result[2] or 0),
-        avg_success_rate=float(service_result[0] or 100),
-        critical_servers=server_result[3] or 0
+        avg_cpu=round(avg_cpu, 2),
+        avg_memory=round(avg_memory, 2),
+        avg_disk=round(avg_disk, 2),
+        avg_success_rate=round(avg_success_rate, 2),
+        critical_servers=critical_servers
     )
 
 
@@ -184,7 +199,7 @@ async def detect_anomalies(
     anomalies = []
     
     # CPU spike detection
-    cpu_query = text("""
+    cpu_query = text(f"""
         SELECT 
             server_id,
             'cpu_spike' as anomaly_type,
@@ -192,13 +207,13 @@ async def detect_anomalies(
             timestamp,
             'high' as severity
         FROM server_metrics
-        WHERE timestamp > NOW() - INTERVAL :hours HOUR
+        WHERE timestamp > NOW() - INTERVAL '{hours} hours'
         AND cpu_percent > 90
         ORDER BY cpu_percent DESC
         LIMIT 20
     """)
     
-    cpu_results = db.execute(cpu_query, {"hours": f"{hours} hours"}).fetchall()
+    cpu_results = db.execute(cpu_query).fetchall()
     
     for row in cpu_results:
         anomalies.append(AnomalyAlert(
@@ -210,7 +225,7 @@ async def detect_anomalies(
         ))
     
     # Memory pressure detection
-    memory_query = text("""
+    memory_query = text(f"""
         SELECT 
             server_id,
             'memory_pressure' as anomaly_type,
@@ -218,13 +233,13 @@ async def detect_anomalies(
             timestamp,
             'high' as severity
         FROM server_metrics
-        WHERE timestamp > NOW() - INTERVAL :hours HOUR
+        WHERE timestamp > NOW() - INTERVAL '{hours} hours'
         AND memory_percent > 85
         ORDER BY memory_percent DESC
         LIMIT 20
     """)
     
-    memory_results = db.execute(memory_query, {"hours": f"{hours} hours"}).fetchall()
+    memory_results = db.execute(memory_query).fetchall()
     
     for row in memory_results:
         anomalies.append(AnomalyAlert(
@@ -236,7 +251,7 @@ async def detect_anomalies(
         ))
     
     # Service error spike detection
-    error_query = text("""
+    error_query = text(f"""
         SELECT 
             service_name,
             'error_spike' as anomaly_type,
@@ -244,13 +259,13 @@ async def detect_anomalies(
             timestamp,
             'critical' as severity
         FROM service_metrics
-        WHERE timestamp > NOW() - INTERVAL :hours HOUR
+        WHERE timestamp > NOW() - INTERVAL '{hours} hours'
         AND error_rate_percent > 10
         ORDER BY error_rate_percent DESC
         LIMIT 20
     """)
     
-    error_results = db.execute(error_query, {"hours": f"{hours} hours"}).fetchall()
+    error_results = db.execute(error_query).fetchall()
     
     for row in error_results:
         anomalies.append(AnomalyAlert(
@@ -395,6 +410,136 @@ async def get_regional_summary(
             "avg_memory": float(row[3]) if row[3] else 0,
             "avg_disk": float(row[4]) if row[4] else 0,
             "critical_count": row[5] or 0
+        }
+        for row in results
+    ]
+
+
+@router.get("/cpu-trends")
+async def get_cpu_trends(
+    hours: int = Query(default=6, le=24),
+    db: Session = Depends(get_db)
+):
+    """
+    Get CPU usage trends over time for charting
+    """
+    query = text(f"""
+        WITH time_buckets AS (
+            SELECT 
+                to_timestamp(FLOOR(EXTRACT(epoch FROM timestamp) / 300) * 300) as time_bucket,
+                AVG(cpu_percent) as avg_cpu
+            FROM server_metrics
+            WHERE timestamp > NOW() - INTERVAL '{hours} hours'
+            GROUP BY FLOOR(EXTRACT(epoch FROM timestamp) / 300)
+            ORDER BY time_bucket
+        )
+        SELECT time_bucket, avg_cpu FROM time_buckets
+    """)
+    
+    results = db.execute(query).fetchall()
+    
+    return [
+        {
+            "time": row[0].isoformat() if row[0] else None,
+            "cpu": float(row[1]) if row[1] else 0
+        }
+        for row in results
+    ]
+
+
+@router.get("/memory-trends")
+async def get_memory_trends(
+    hours: int = Query(default=6, le=24),
+    db: Session = Depends(get_db)
+):
+    """
+    Get Memory usage trends over time for charting
+    """
+    query = text(f"""
+        WITH time_buckets AS (
+            SELECT 
+                to_timestamp(FLOOR(EXTRACT(epoch FROM timestamp) / 300) * 300) as time_bucket,
+                AVG(memory_percent) as avg_memory
+            FROM server_metrics
+            WHERE timestamp > NOW() - INTERVAL '{hours} hours'
+            GROUP BY FLOOR(EXTRACT(epoch FROM timestamp) / 300)
+            ORDER BY time_bucket
+        )
+        SELECT time_bucket, avg_memory FROM time_buckets
+    """)
+    
+    results = db.execute(query).fetchall()
+    
+    return [
+        {
+            "time": row[0].isoformat() if row[0] else None,
+            "memory": float(row[1]) if row[1] else 0
+        }
+        for row in results
+    ]
+
+
+@router.get("/disk-trends")
+async def get_disk_trends(
+    hours: int = Query(default=6, le=24),
+    db: Session = Depends(get_db)
+):
+    """
+    Get Disk usage trends over time for charting
+    """
+    query = text(f"""
+        WITH time_buckets AS (
+            SELECT 
+                to_timestamp(FLOOR(EXTRACT(epoch FROM timestamp) / 300) * 300) as time_bucket,
+                AVG(disk_utilization) as avg_disk
+            FROM server_metrics
+            WHERE timestamp > NOW() - INTERVAL '{hours} hours'
+            GROUP BY FLOOR(EXTRACT(epoch FROM timestamp) / 300)
+            ORDER BY time_bucket
+        )
+        SELECT time_bucket, avg_disk FROM time_buckets
+    """)
+    
+    results = db.execute(query).fetchall()
+    
+    return [
+        {
+            "time": row[0].isoformat() if row[0] else None,
+            "disk": float(row[1]) if row[1] else 0
+        }
+        for row in results
+    ]
+
+
+@router.get("/service-trends")
+async def get_service_trends(
+    hours: int = Query(default=6, le=24),
+    db: Session = Depends(get_db)
+):
+    """
+    Get Service success rate trends for charting
+    """
+    query = text(f"""
+        WITH time_buckets AS (
+            SELECT 
+                to_timestamp(FLOOR(EXTRACT(epoch FROM timestamp) / 300) * 300) as time_bucket,
+                AVG(success_rate) as avg_success_rate,
+                SUM(total_requests) as total_requests
+            FROM service_metrics
+            WHERE timestamp > NOW() - INTERVAL '{hours} hours'
+            GROUP BY FLOOR(EXTRACT(epoch FROM timestamp) / 300)
+            ORDER BY time_bucket
+        )
+        SELECT time_bucket, avg_success_rate, total_requests FROM time_buckets
+    """)
+    
+    results = db.execute(query).fetchall()
+    
+    return [
+        {
+            "time": row[0].isoformat() if row[0] else None,
+            "success_rate": float(row[1]) if row[1] else 0,
+            "requests": int(row[2]) if row[2] else 0
         }
         for row in results
     ]

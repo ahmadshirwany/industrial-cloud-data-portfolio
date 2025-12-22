@@ -25,7 +25,7 @@ async def get_container_health(
     """
     Get container health summary
     """
-    query = text("""
+    query = text(f"""
         SELECT 
             COUNT(DISTINCT container_id) as total_containers,
             COUNT(DISTINCT CASE WHEN health = 'healthy' THEN container_id END) as healthy_containers,
@@ -34,18 +34,18 @@ async def get_container_health(
             AVG(memory_utilization) as avg_memory_utilization,
             SUM(restart_count) as total_restarts
         FROM container_metrics
-        WHERE timestamp > NOW() - INTERVAL :minutes MINUTE
+        WHERE timestamp > NOW() - INTERVAL '{minutes} minutes'
     """)
     
-    result = db.execute(query, {"minutes": f"{minutes} minutes"}).fetchone()
+    result = db.execute(query).fetchone()
     
     return ContainerHealthSummary(
-        total_containers=result[0] or 0,
-        healthy_containers=result[1] or 0,
-        degraded_containers=result[2] or 0,
-        unhealthy_containers=result[3] or 0,
-        avg_memory_utilization=float(result[4] or 0),
-        total_restarts=result[5] or 0
+        total_containers=int(result[0] or 0),
+        healthy_containers=int(result[1] or 0),
+        degraded_containers=int(result[2] or 0),
+        unhealthy_containers=int(result[3] or 0),
+        avg_memory_utilization=round(float(result[4] or 0), 2),
+        total_restarts=int(result[5] or 0)
     )
 
 
@@ -68,6 +68,7 @@ async def get_current_containers(
             c.timestamp,
             c.container_id,
             c.service_name,
+            c.cpu_percent,
             c.memory_utilization,
             c.requests_per_sec,
             c.health
@@ -84,9 +85,10 @@ async def get_current_containers(
             timestamp=row[0],
             container_id=row[1],
             service_name=row[2],
-            memory_utilization=float(row[3]) if row[3] else None,
-            requests_per_sec=row[4],
-            health=row[5]
+            cpu_percent=float(row[3]) if row[3] else None,
+            memory_utilization=float(row[4]) if row[4] else None,
+            requests_per_sec=row[5],
+            health=row[6]
         )
         for row in results
     ]

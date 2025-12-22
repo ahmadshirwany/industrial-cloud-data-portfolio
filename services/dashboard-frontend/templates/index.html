@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Industrial Cloud Dashboard{% endblock %}
+
+{% block content %}
+<div class="py-12">
+    <div class="text-center">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Welcome to Industrial Cloud Dashboard</h2>
+        <p class="text-xl text-gray-600 mb-8">Real-time monitoring and analytics for your industrial infrastructure</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            <!-- Dashboard Card -->
+            <a href="/dashboard" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="text-4xl mb-4">📊</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Dashboard</h3>
+                <p class="text-gray-600">View system health and key metrics at a glance</p>
+            </a>
+
+            <!-- Servers Card -->
+            <a href="/servers" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="text-4xl mb-4">🖥️</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Servers</h3>
+                <p class="text-gray-600">Monitor individual server performance and health</p>
+            </a>
+
+            <!-- Containers Card -->
+            <a href="/containers" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="text-4xl mb-4">📦</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Containers</h3>
+                <p class="text-gray-600">Track container health and resource utilization</p>
+            </a>
+
+            <!-- Services Card -->
+            <a href="/services" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="text-4xl mb-4">⚙️</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Services</h3>
+                <p class="text-gray-600">Analyze service performance and availability</p>
+            </a>
+
+            <!-- Analytics Card -->
+            <a href="/analytics" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="text-4xl mb-4">📈</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Analytics</h3>
+                <p class="text-gray-600">View anomalies and capacity forecasts</p>
+            </a>
+
+            <!-- Profile/CV Card -->
+            <a href="/profile" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="text-4xl mb-4">👨‍💻</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">My Profile</h3>
+                <p class="text-gray-600">View interactive CV and professional details</p>
+            </a>
+
+            <!-- API Docs Card -->
+            <a href="http://localhost:8080/docs" target="_blank" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="text-4xl mb-4">📚</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">API Docs</h3>
+                <p class="text-gray-600">Explore the complete API documentation</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

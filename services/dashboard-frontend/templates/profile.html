@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Ahmad Ali Khan Shirwany{% endblock %}
+
+{% block content %}
+<style>
+    /* Profile Page Specific Styles */
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-image {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: block;
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        object-fit: cover;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .profile-header h1 {
+        font-size: 2.5em;
+        margin: 0 0 10px 0;
+        font-weight: 700;
+    }
+
+    .profile-title {
+        font-size: 1.2em;
+        opacity: 0.95;
+        margin-bottom: 20px;
+    }
+
+    .contact-links {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .contact-link {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: 2px solid white;
+    }
+
+    .contact-link:hover {
+        background: white;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #667eea;
+    }
+
+    .section-card h2 {
+        color: #667eea;
+        font-size: 1.8em;
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+    }
+
+    .professional-summary {
+        font-size: 1.1em;
+        line-height: 1.8;
+        color: #555;
+        font-style: italic;
+    }
+
+    .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .skill-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 25px;
+        text-align: center;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .skill-badge:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
+        background: linear-gradient(135deg, #764ba2, #667eea);
+    }
+
+    .experience-item {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .experience-item:last-child {
+        border-bottom: none;
+    }
+
+    .job-title {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #667eea;
+        margin: 0 0 5px 0;
+    }
+
+    .company-date {
+        color: #888;
+        font-style: italic;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .responsibilities {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .responsibilities li {
+        padding: 8px 0 8px 25px;
+        position: relative;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .responsibilities li:before {
+        content: "▸";
+        position: absolute;
+        left: 0;
+        color: #667eea;
+        font-weight: bold;
+    }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .project-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s;
+    }
+
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    }
+
+    .project-title {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 1.1em;
+        margin: 0 0 8px 0;
+    }
+
+    .project-date {
+        font-size: 0.9em;
+        color: #888;
+        font-style: italic;
+        margin-bottom: 10px;
+    }
+
+    .project-description {
+        color: #555;
+        line-height: 1.6;
+        font-size: 0.95em;
+    }
+
+    .education-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .edu-card {
+        background: linear-gradient(135deg, #667eea10, #764ba210);
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .edu-card h3 {
+        color: #667eea;
+        margin: 0 0 10px 0;
+    }
+
+    .edu-card p {
+        margin: 5px 0;
+        color: #555;
+    }
+
+    .edu-institution {
+        font-weight: 600;
+        color: #764ba2;
+    }
+
+    .edu-date {
+        font-style: italic;
+        color: #888;
+        font-size: 0.9em;
+    }
+
+    .certifications-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 15px;
+    }
+
+    .cert-item {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .soft-skills {
+        background: linear-gradient(135deg, #667eea10, #764ba210);
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .soft-skills li {
+        margin: 8px 0;
+        color: #555;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 30px;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+    .back-button:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 30px 15px;
+        }
+
+        .profile-header h1 {
+            font-size: 1.8em;
+        }
+
+        .section-card {
+            padding: 20px 15px;
+        }
+
+        .skills-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .education-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Back Button -->
+<a href="/" class="back-button">← Back to Dashboard</a>
+
+<!-- Profile Header -->
+<div class="profile-header">
+    <img src="/static/profile-image.jpg" alt="Ahmad Ali Khan Shirwany" class="profile-image">
+    <h1>Ahmad Ali Khan Shirwany</h1>
+    <p class="profile-title">Software Developer • Automation Engineer</p>
+    <div class="contact-links">
+        <a href="mailto:shirwany.shirwany@gmail.com" class="contact-link">📧 Email</a>
+        <a href="https://www.linkedin.com/in/ahmad-ali-khan-shirwany-753b0a164/" target="_blank" class="contact-link">🔗 LinkedIn</a>
+        <a href="https://github.com/ahmadshirwany" target="_blank" class="contact-link">🐙 GitHub</a>
+        <a href="#" class="contact-link">📍 Tampere, Finland</a>
+    </div>
+</div>
+
+<!-- Professional Summary -->
+<div class="section-card">
+    <h2>Professional Summary</h2>
+    <p class="professional-summary">
+        Dedicated Software Developer and Automation Specialist with a strong passion for crafting innovative software solutions and optimizing processes through automation. Proficient in Python, web development, ETL scripting, API integration, and data visualization. Skilled in developing and managing automation scripts, web scraping tools, and robust backend systems. Experienced in wireless 3G, 4G, and 5G technologies, as well as networking (R&S). With hands-on experience in integrating advanced software solutions into automated and connected systems. Eager to leverage expertise to develop innovative software solutions that shape the future of automation, robotics, and connectivity.
+    </p>
+</div>
+
+<!-- Skills Section -->
+<div class="section-card">
+    <h2>Technical Skills</h2>
+    <div class="skills-grid">
+        <div class="skill-badge">Python</div>
+        <div class="skill-badge">Robot Framework</div>
+        <div class="skill-badge">C++</div>
+        <div class="skill-badge">JavaScript</div>
+        <div class="skill-badge">Django / Flask</div>
+        <div class="skill-badge">SQL / NoSQL</div>
+        <div class="skill-badge">ETL</div>
+        <div class="skill-badge">RESTful APIs</div>
+        <div class="skill-badge">Selenium</div>
+        <div class="skill-badge">Pandas & NumPy</div>
+        <div class="skill-badge">Web Scraping</div>
+        <div class="skill-badge">Automation</div>
+        <div class="skill-badge">CI/CD</div>
+        <div class="skill-badge">Git & Jira</div>
+        <div class="skill-badge">Agile</div>
+        <div class="skill-badge">Linux / Bash</div>
+        <div class="skill-badge">AWS</div>
+        <div class="skill-badge">Azure</div>
+        <div class="skill-badge">Networking</div>
+        <div class="skill-badge">5G / 4G / 3G</div>
+        <div class="skill-badge">Robotics</div>
+        <div class="skill-badge">MATLAB</div>
+        <div class="skill-badge">Signal Processing</div>
+        <div class="skill-badge">PyQt</div>
+    </div>
+</div>
+
+<!-- Experience Section -->
+<div class="section-card">
+    <h2>Professional Experience</h2>
+    
+    <div class="experience-item">
+        <h3 class="job-title">Software Engineer (Freelancing)</h3>
+        <div class="company-date">
+            <span>Upwork</span>
+            <span>Jan 2022 - Present (Remote)</span>
+        </div>
+        <ul class="responsibilities">
+            <li>Providing services for designing data pipelines and automation of data flow for use in different applications</li>
+            <li>Python API integration for seamless data communication and interoperability</li>
+            <li>Web scraping to gather and analyze valuable data in MongoDB, MySQL, PostgreSQL, and JSON formats</li>
+            <li>Web automation and desktop applications to automate day-to-day tasks, increasing efficiency by 25%</li>
+            <li>Improved system performance through optimizing Python scripts and automation workflows</li>
+        </ul>
+    </div>
+
+    <div class="experience-item">
+        <h3 class="job-title">Backend Developer</h3>
+        <div class="company-date">
+            <span>Comundo</span>
+            <span>Feb 2022 - May 2023 (Remote)</span>
+        </div>
+        <ul class="responsibilities">
+            <li>Building and maintaining reliable, efficient server-side applications using Django</li>
+            <li>Developing and managing web data visualization dashboards</li>
+            <li>Developing and managing web scrapers for data extraction with automated data flows</li>
+            <li>Utilized Robot Framework/Selenium to automate web application testing</li>
+            <li>Implemented ETL stored methods to reduce database load and enable faster reporting</li>
+            <li>Collaborated with QA team using JIRA in CI/CD environment with GitHub Actions</li>
+        </ul>
+    </div>
+
+    <div class="experience-item">
+        <h3 class="job-title">Wireless Design Engineer</h3>
+        <div class="company-date">
+            <span>Huawei Technologies Co., Ltd.</span>
+            <span>Nov 2018 - Feb 2022 (Islamabad, Pakistan)</span>
+        </div>
+        <ul class="responsibilities">
+            <li>Worked on RSC Pakistan projects for JAZZ, STC, Mobily using Python for 3G/4G/5G design automation</li>
+            <li>Automated wireless site design to generate required site solutions</li>
+            <li>Generated project reports and proposed solutions to enhance efficiency</li>
+            <li>Designed and maintained Python-based tools to automate daily tasks</li>
+            <li>Managed design and management phases over 20+ projects</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Projects Section -->
+<div class="section-card">
+    <h2>Key Projects</h2>
+    <div class="projects-grid">
+        <div class="project-card">
+            <h4 class="project-title">Hardening Crate Loading Automation</h4>
+            <p class="project-date">Aug 2024 - Jan 2025</p>
+            <p class="project-description">Collaborated with Sandvik to develop automated solution using Visual Components simulation and Comau robot deployment.</p>
+        </div>
+
+        <div class="project-card">
+            <h4 class="project-title">Remote Industrial Equipment Monitoring</h4>
+            <p class="project-date">2023</p>
+            <p class="project-description">Designed and implemented SCADA system for monitoring industrial robots, deployed to Azure as web services.</p>
+        </div>
+
+        <div class="project-card">
+            <h4 class="project-title">Wireless Design Projects (Telecommunications)</h4>
+            <p class="project-date">2018-2022</p>
+            <p class="project-description">Jazz 4G MIMO, Saudi Telecom 5G, Mobily expansions - Automated design processes and material management.</p>
+        </div>
+
+        <div class="project-card">
+            <h4 class="project-title">Maze-Solving Swarm Robots</h4>
+            <p class="project-date">2017</p>
+            <p class="project-description">Implemented maze-solving algorithm for swarm robots using Atmega16 microcontroller in Robian competition.</p>
+        </div>
+
+        <div class="project-card">
+            <h4 class="project-title">Radar Target Detection System</h4>
+            <p class="project-date">2017-2018</p>
+            <p class="project-description">NESCOM-funded: Designed MATLAB radar model for target detection in cluttered environments.</p>
+        </div>
+
+        <div class="project-card">
+            <h4 class="project-title">Arduino-Based Dynamometer</h4>
+            <p class="project-date">2014</p>
+            <p class="project-description">Engineered dynamometer measuring up to 1000kg pulling force for agriculture industry applications.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Education Section -->
+<div class="section-card">
+    <h2>Education</h2>
+    <div class="education-grid">
+        <div class="edu-card">
+            <h3>Master's Degree in Automation Engineering</h3>
+            <p class="edu-institution">Tampere University</p>
+            <p>Tampere, Finland</p>
+            <p class="edu-date">09/2023 - Present</p>
+        </div>
+
+        <div class="edu-card">
+            <h3>BSc in Electrical Engineering (Telecommunication)</h3>
+            <p class="edu-institution">COMSATS University Islamabad</p>
+            <p>Islamabad, Pakistan</p>
+            <p class="edu-date">09/2014 - 06/2018</p>
+        </div>
+    </div>
+</div>
+
+<!-- Certifications Section -->
+<div class="section-card">
+    <h2>Certifications & Credentials</h2>
+    <div class="certifications-list">
+        <div class="cert-item">HCIP - Huawei Certified ICT Professional (LTE/4G)</div>
+        <div class="cert-item">Python Django - The Practical Guide</div>
+        <div class="cert-item">Web Automation & Selenium Specialization</div>
+    </div>
+</div>
+
+<!-- Soft Skills Section -->
+<div class="section-card">
+    <div class="soft-skills">
+        <h2 style="margin-top: 0;">Soft Skills & Languages</h2>
+        <ul class="responsibilities" style="margin: 0;">
+            <li><strong>Soft Skills:</strong> Problem-solving • Collaboration • Communication • Adaptability • Continuous Learning</li>
+            <li><strong>Languages:</strong> English (Advanced)</li>
+            <li><strong>Interests:</strong> Programming • Football • Fitness • Cooking</li>
+        </ul>
+    </div>
+</div>
+
+<a href="/" class="back-button">← Back to Dashboard</a>
+
+{% endblock %}

@@ -68,11 +68,11 @@ services:
   dashboard-frontend:
     build:
       context: .
-      dockerfile: dashboard-frontend/Dockerfile
+      dockerfile: services/dashboard-frontend/Dockerfile
     ports:
-      - "5173:5173"
+      - "8000:8000"
     environment:
-      - VITE_API_URL=http://dashboard-api:8080
+      - API_BASE_URL=http://dashboard-api:8080
     restart: unless-stopped
     container_name: dashboard-frontend
     depends_on:

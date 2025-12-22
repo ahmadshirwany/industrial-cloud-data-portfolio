@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Servers - Industrial Cloud Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="text-3xl font-bold text-gray-900 mb-8">Server Monitoring</h2>
+
+<!-- Server Health Summary -->
+<div class="grid grid-cols-4 gap-4 mb-8">
+    <div class="text-center p-4 bg-green-50 rounded-lg">
+        <div class="text-3xl font-bold text-green-600">{{ health.get('healthy_servers', 0) }}</div>
+        <p class="text-gray-600 text-sm">Healthy</p>
+    </div>
+    <div class="text-center p-4 bg-yellow-50 rounded-lg">
+        <div class="text-3xl font-bold text-yellow-600">{{ health.get('warning_servers', 0) }}</div>
+        <p class="text-gray-600 text-sm">Warning</p>
+    </div>
+    <div class="text-center p-4 bg-red-50 rounded-lg">
+        <div class="text-3xl font-bold text-red-600">{{ health.get('critical_servers', 0) }}</div>
+        <p class="text-gray-600 text-sm">Critical</p>
+    </div>
+    <div class="text-center p-4 bg-blue-50 rounded-lg">
+        <div class="text-3xl font-bold text-blue-600">{{ health.get('total_servers', 0) }}</div>
+        <p class="text-gray-600 text-sm">Total</p>
+    </div>
+</div>
+
+<!-- Servers Table with HTMX auto-refresh -->
+<div class="bg-white rounded-xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+    <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="mr-2">📺</span>Current Servers
+    </h3>
+    <div class="overflow-x-auto rounded-lg border border-gray-200">
+        <table class="min-w-full">
+            <thead class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b-2 border-blue-200 sticky top-0">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">📺 Server ID</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">🌍 Region</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">💻 CPU %</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">🧠 Memory %</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">💾 Disk %</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">⏱️ Uptime</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">❤️ Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200" hx-get="/api/servers-table" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                <!-- Rows loaded via HTMX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Metrics Summary -->
+<div class="grid grid-cols-3 gap-6 mt-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-gray-500 text-sm font-medium mb-2">Avg CPU</h3>
+        <div class="text-3xl font-bold text-blue-600">{{ "%.1f"|format(health.get('avg_cpu', 0)) }}%</div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-gray-500 text-sm font-medium mb-2">Avg Memory</h3>
+        <div class="text-3xl font-bold text-blue-600">{{ "%.1f"|format(health.get('avg_memory', 0)) }}%</div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-gray-500 text-sm font-medium mb-2">Avg Disk</h3>
+        <div class="text-3xl font-bold text-blue-600">{{ "%.1f"|format(health.get('avg_disk', 0)) }}%</div>
+    </div>
+</div>
+{% endblock %}

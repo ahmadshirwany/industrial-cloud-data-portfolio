@@ -28,7 +28,7 @@ async def get_server_health(
     Get current server health summary
     Returns counts by status and average resource usage
     """
-    query = text("""
+    query = text(f"""
         SELECT 
             COUNT(DISTINCT server_id) as total_servers,
             COUNT(DISTINCT CASE WHEN status = 'healthy' THEN server_id END) as healthy_servers,
@@ -38,19 +38,19 @@ async def get_server_health(
             AVG(memory_percent) as avg_memory,
             AVG(disk_utilization) as avg_disk
         FROM server_metrics
-        WHERE timestamp > NOW() - INTERVAL :minutes MINUTE
+        WHERE timestamp > NOW() - INTERVAL '{minutes} minutes'
     """)
     
-    result = db.execute(query, {"minutes": f"{minutes} minutes"}).fetchone()
+    result = db.execute(query).fetchone()
     
     return ServerHealthSummary(
-        total_servers=result[0] or 0,
-        healthy_servers=result[1] or 0,
-        warning_servers=result[2] or 0,
-        critical_servers=result[3] or 0,
-        avg_cpu=float(result[4] or 0),
-        avg_memory=float(result[5] or 0),
-        avg_disk=float(result[6] or 0)
+        total_servers=int(result[0] or 0),
+        healthy_servers=int(result[1] or 0),
+        warning_servers=int(result[2] or 0),
+        critical_servers=int(result[3] or 0),
+        avg_cpu=round(float(result[4] or 0), 2),
+        avg_memory=round(float(result[5] or 0), 2),
+        avg_disk=round(float(result[6] or 0), 2)
     )
 
 
@@ -126,12 +126,12 @@ async def get_cpu_trend(
             AVG(memory_percent) as avg_memory,
             AVG(disk_utilization) as avg_disk
         FROM server_metrics
-        WHERE timestamp > NOW() - INTERVAL :hours HOUR
+        WHERE timestamp > NOW() - INTERVAL '{hours} hours'
         GROUP BY time
         ORDER BY time
     """)
     
-    results = db.execute(query, {"hours": f"{hours} hours"}).fetchall()
+    results = db.execute(query).fetchall()
     
     return [
         ServerTrend(

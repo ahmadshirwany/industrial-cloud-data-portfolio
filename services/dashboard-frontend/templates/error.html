@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Error - Industrial Cloud Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-red-100">
+    <div class="text-center max-w-md mx-auto p-8">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ error_title | default('Error') }}</h1>
+        <p class="text-gray-600 mb-6">{{ error_message | default('An unexpected error occurred. Please try again later.') }}</p>
+        
+        {% if error_code %}
+        <div class="mb-6 p-4 bg-gray-100 rounded-lg font-mono text-sm text-gray-700">
+            Error Code: {{ error_code }}
+        </div>
+        {% endif %}
+        
+        <div class="space-y-2">
+            <a href="/" class="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                Return to Home
+            </a>
+            <a href="/dashboard" class="block w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                Go to Dashboard
+            </a>
+        </div>
+        
+        {% if debug_info %}
+        <details class="mt-8 text-left">
+            <summary class="cursor-pointer text-sm font-semibold text-gray-600 hover:text-gray-900">Debug Information</summary>
+            <pre class="mt-2 p-4 bg-gray-100 rounded text-xs overflow-x-auto text-gray-700">{{ debug_info }}</pre>
+        </details>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Industrial Cloud Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="text-3xl font-bold text-gray-900 mb-8">Analytics & Insights</h2>
+
+<!-- Capacity Forecast -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">7-Day Capacity Forecast</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% for forecast in forecast %}
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <h4 class="font-semibold text-gray-900">{{ forecast.get('date', 'N/A') }}</h4>
+            <div class="mt-2 space-y-1">
+                <div class="text-sm">
+                    <span class="text-gray-600">CPU:</span>
+                    <span class="font-semibold text-blue-600">{{ "%.1f"|format(forecast.get('avg_cpu', 0)) }}%</span>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-600">Memory:</span>
+                    <span class="font-semibold text-green-600">{{ "%.1f"|format(forecast.get('avg_memory', 0)) }}%</span>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-600">Disk:</span>
+                    <span class="font-semibold text-yellow-600">{{ "%.1f"|format(forecast.get('avg_disk', 0)) }}%</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Regional Summary -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Regional Summary</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for region in regional %}
+        <div class="border rounded-lg p-4 border-gray-200">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">{{ region.get('region', 'N/A') }}</h4>
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Servers:</span>
+                    <span class="font-semibold">{{ region.get('server_count', 0) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Avg CPU:</span>
+                    <span class="font-semibold text-blue-600">{{ "%.1f"|format(region.get('avg_cpu', 0)) }}%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Avg Memory:</span>
+                    <span class="font-semibold text-green-600">{{ "%.1f"|format(region.get('avg_memory', 0)) }}%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Avg Disk:</span>
+                    <span class="font-semibold text-yellow-600">{{ "%.1f"|format(region.get('avg_disk', 0)) }}%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Critical Count:</span>
+                    <span class="font-semibold text-red-600">{{ region.get('critical_count', 0) }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Anomalies Detection -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Detected Anomalies (Last Hour)</h3>
+    <div class="space-y-3 max-h-96 overflow-y-auto">
+        {% for anomaly in anomalies[:10] %}
+        <div class="p-4 border rounded-lg {% if anomaly.get('severity') == 'high' %}border-red-300 bg-red-50{% elif anomaly.get('severity') == 'medium' %}border-yellow-300 bg-yellow-50{% else %}border-blue-300 bg-blue-50{% endif %}">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="font-semibold text-gray-900">{{ anomaly.get('resource_name', 'N/A') }}</p>
+                    <p class="text-sm text-gray-600">{{ anomaly.get('anomaly_type', 'N/A') | replace('_', ' ') | title }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ anomaly.get('timestamp', 'N/A') }}</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold {% if anomaly.get('severity') == 'high' %}text-red-600{% elif anomaly.get('severity') == 'medium' %}text-yellow-600{% else %}text-blue-600{% endif %}">
+                        {{ "%.1f"|format(anomaly.get('value', 0)) }}
+                    </div>
+                    <span class="text-xs font-semibold {% if anomaly.get('severity') == 'high' %}text-red-700{% elif anomaly.get('severity') == 'medium' %}text-yellow-700{% else %}text-blue-700{% endif %}">
+                        {{ anomaly.get('severity', 'N/A') | upper }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-8">No anomalies detected</p>
+        {% endfor %}
+    </div>
+    {% if anomalies|length > 10 %}
+    <p class="text-center text-sm text-gray-500 mt-4">Showing 10 of {{ anomalies|length }} anomalies</p>
+    {% endif %}
+</div>
+{% endblock %}

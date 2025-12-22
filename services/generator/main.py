@@ -43,8 +43,9 @@ def main():
     generator = TelemetryGeneratorService(pubsub)
     
     logger.info("✅ Generator service ready")
-    logger.info("📤 Publishing metrics every 30 seconds...")
-    logger.info("⚙️  Optimized for cost: 2,880 records/day (vs 17,280 baseline)")
+    logger.info("📤 Publishing metrics every 5 minutes (conserving database space)")
+    logger.info("⚙️  Optimized for long-term storage: ~288 records/day")
+    logger.info("💾 Database preservation mode: 8GB remaining space")
     logger.info("Press Ctrl+C to stop\n")
     
     try:
@@ -59,7 +60,7 @@ def main():
             logger.info(f"  Service:   {metrics['service']['service_name']} - Error: {metrics['service']['error_rate_percent']}%")
             logger.info("")
             
-            time.sleep(30)
+            time.sleep(300)
     
     except KeyboardInterrupt:
         logger.info("\n" + "=" * 70)

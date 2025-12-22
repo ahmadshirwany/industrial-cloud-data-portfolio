@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Industrial Cloud Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-8">📊 System Dashboard</h2>
+
+<!-- System Health Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+    <!-- Health Score -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-600 hover:shadow-2xl transition-shadow duration-300 hover:scale-105 transform">
+        <div class="text-sm text-gray-600 font-bold uppercase tracking-wide">Health Score</div>
+        <div class="text-4xl font-bold text-blue-600 mt-2">
+            {{ "%.0f"|format(health.score) if health.score else 0 }}<span class="text-lg">/100</span>
+        </div>
+        <div class="text-xs text-gray-500 mt-1">System Health</div>
+    </div>
+
+    <!-- Avg CPU -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500 hover:shadow-2xl transition-shadow duration-300 hover:scale-105 transform">
+        <div class="text-sm text-gray-600 font-bold uppercase tracking-wide">Avg CPU</div>
+        <div class="text-4xl font-bold text-orange-500 mt-2">{{ "%.1f"|format(health.avg_cpu) }}%</div>
+        <div class="text-xs text-gray-500 mt-1">Active</div>
+    </div>
+
+    <!-- Avg Memory -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-2xl transition-shadow duration-300 hover:scale-105 transform">
+        <div class="text-sm text-gray-600 font-bold uppercase tracking-wide">Avg Memory</div>
+        <div class="text-4xl font-bold text-green-500 mt-2">{{ "%.1f"|format(health.avg_memory) }}%</div>
+        <div class="text-xs text-gray-500 mt-1">Used</div>
+    </div>
+
+    <!-- Avg Disk -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500 hover:shadow-2xl transition-shadow duration-300 hover:scale-105 transform">
+        <div class="text-sm text-gray-600 font-bold uppercase tracking-wide">Avg Disk</div>
+        <div class="text-4xl font-bold text-yellow-500 mt-2">{{ "%.1f"|format(health.avg_disk) }}%</div>
+        <div class="text-xs text-gray-500 mt-1">Utilization</div>
+    </div>
+
+    <!-- Success Rate -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-teal-500 hover:shadow-2xl transition-shadow duration-300 hover:scale-105 transform">
+        <div class="text-sm text-gray-600 font-bold uppercase tracking-wide">Success Rate</div>
+        <div class="text-4xl font-bold text-teal-500 mt-2">{{ "%.1f"|format(health.avg_success_rate) }}%</div>
+        <div class="text-xs text-gray-500 mt-1">Services</div>
+    </div>
+
+    <!-- Critical Servers -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 {% if health.critical_servers > 0 %}border-red-600{% else %}border-green-600{% endif %} hover:shadow-2xl transition-shadow duration-300 hover:scale-105 transform">
+        <div class="text-sm text-gray-600 font-bold uppercase tracking-wide">Critical</div>
+        <div class="text-4xl font-bold {% if health.critical_servers > 0 %}text-red-600{% else %}text-green-600{% endif %} mt-2">{{ health.critical_servers }}</div>
+        <div class="text-xs text-gray-500 mt-1">Servers</div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- CPU Trend Chart -->
+    <div class="bg-white rounded-xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="mr-2">📈</span>CPU Usage Trend <span class="text-gray-400 text-sm font-normal ml-2">(Last 6 Hours)</span>
+        </h3>
+        <div style="position: relative; height: 300px;">
+            <canvas id="cpuChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Memory Trend Chart -->
+    <div class="bg-white rounded-xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="mr-2">📊</span>Memory Usage Trend <span class="text-gray-400 text-sm font-normal ml-2">(Last 6 Hours)</span>
+        </h3>
+        <div style="position: relative; height: 300px;">
+            <canvas id="memoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Disk Trend Chart -->
+    <div class="bg-white rounded-xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="mr-2">💾</span>Disk Usage Trend <span class="text-gray-400 text-sm font-normal ml-2">(Last 6 Hours)</span>
+        </h3>
+        <div style="position: relative; height: 300px;">
+            <canvas id="diskChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Service Success Rate Chart -->
+    <div class="bg-white rounded-xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="mr-2">✅</span>Service Success Rate <span class="text-gray-400 text-sm font-normal ml-2">(Last 6 Hours)</span>
+        </h3>
+        <div style="position: relative; height: 300px;">
+            <canvas id="serviceChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Server Health Summary -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="text-sm text-green-700 font-bold uppercase tracking-wide">✓ Healthy</div>
+        <div class="text-3xl font-bold text-green-600 mt-2">{{ servers.healthy_servers }}</div>
+        <div class="text-xs text-green-600 mt-1">Servers</div>
+    </div>
+    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-6 border-2 border-yellow-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="text-sm text-yellow-700 font-bold uppercase tracking-wide">⚠ Warning</div>
+        <div class="text-3xl font-bold text-yellow-600 mt-2">{{ servers.warning_servers }}</div>
+        <div class="text-xs text-yellow-600 mt-1">Servers</div>
+    </div>
+    <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border-2 border-red-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="text-sm text-red-700 font-bold uppercase tracking-wide">✕ Critical</div>
+        <div class="text-3xl font-bold text-red-600 mt-2">{{ servers.critical_servers }}</div>
+        <div class="text-xs text-red-600 mt-1">Servers</div>
+    </div>
+    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="text-sm text-blue-700 font-bold uppercase tracking-wide">📊 Total</div>
+        <div class="text-3xl font-bold text-blue-600 mt-2">{{ servers.total_servers }}</div>
+        <div class="text-xs text-blue-600 mt-1">Servers</div>
+    </div>
+</div>
+
+<!-- Container Health Summary -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="text-sm text-green-700 font-bold uppercase tracking-wide">✓ Healthy</div>
+        <div class="text-3xl font-bold text-green-600 mt-2">{{ containers.healthy_containers }}</div>
+        <div class="text-xs text-green-600 mt-1">Containers</div>
+    </div>
+    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-6 border-2 border-yellow-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="text-sm text-yellow-700 font-bold uppercase tracking-wide">⚠ Degraded</div>
+        <div class="text-3xl font-bold text-yellow-600 mt-2">{{ containers.degraded_containers }}</div>
+        <div class="text-xs text-yellow-600 mt-1">Containers</div>
+    </div>
+    <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border-2 border-red-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="text-sm text-red-700 font-bold uppercase tracking-wide">✕ Unhealthy</div>
+        <div class="text-3xl font-bold text-red-600 mt-2">{{ containers.unhealthy_containers }}</div>
+        <div class="text-xs text-red-600 mt-1">Containers</div>
+    </div>
+    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="text-sm text-blue-700 font-bold uppercase tracking-wide">📊 Total</div>
+        <div class="text-3xl font-bold text-blue-600 mt-2">{{ containers.total_containers }}</div>
+        <div class="text-xs text-blue-600 mt-1">Containers</div>
+    </div>
+</div>
+
+<script>
+    // CPU Trend Chart
+    const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+    fetch('/api/cpu-trends?hours=6')
+        .then(r => r.json())
+        .then(data => {
+            new Chart(cpuCtx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.time).toLocaleTimeString()),
+                    datasets: [{
+                        label: 'CPU %',
+                        data: data.map(d => d.cpu),
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { max: 100, min: 0 } }
+                }
+            });
+        }).catch(e => console.error('CPU chart error:', e));
+
+    // Memory Trend Chart
+    const memoryCtx = document.getElementById('memoryChart').getContext('2d');
+    fetch('/api/memory-trends?hours=6')
+        .then(r => r.json())
+        .then(data => {
+            new Chart(memoryCtx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.time).toLocaleTimeString()),
+                    datasets: [{
+                        label: 'Memory %',
+                        data: data.map(d => d.memory),
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { max: 100, min: 0 } }
+                }
+            });
+        }).catch(e => console.error('Memory chart error:', e));
+
+    // Disk Trend Chart
+    const diskCtx = document.getElementById('diskChart').getContext('2d');
+    fetch('/api/disk-trends?hours=6')
+        .then(r => r.json())
+        .then(data => {
+            new Chart(diskCtx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.time).toLocaleTimeString()),
+                    datasets: [{
+                        label: 'Disk %',
+                        data: data.map(d => d.disk),
+                        borderColor: '#eab308',
+                        backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { max: 100, min: 0 } }
+                }
+            });
+        }).catch(e => console.error('Disk chart error:', e));
+
+    // Service Success Rate Chart
+    const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+    fetch('/api/service-trends?hours=6')
+        .then(r => r.json())
+        .then(data => {
+            new Chart(serviceCtx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.time).toLocaleTimeString()),
+                    datasets: [{
+                        label: 'Success Rate %',
+                        data: data.map(d => d.success_rate),
+                        borderColor: '#14b8a6',
+                        backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { max: 100, min: 0 } }
+                }
+            });
+        }).catch(e => console.error('Service chart error:', e));
+</script>
+{% endblock %}

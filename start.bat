@@ -64,7 +64,7 @@ echo Dashboard is Ready!
 echo ========================================
 echo.
 echo Services running:
-echo   Dashboard Frontend: http://localhost:5173
+echo   Dashboard Frontend: http://localhost:8000
 echo   Dashboard API:      http://localhost:8080
 echo   API Documentation:  http://localhost:8080/docs
 echo.

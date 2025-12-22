@@ -1,0 +1,45 @@
+{% for server in servers %}
+<tr class="border-t border-gray-200 hover:bg-blue-50 transition-colors duration-150">
+    <td class="px-6 py-4 font-bold text-gray-900">{{ server.get('server_id', 'N/A') }}</td>
+    <td class="px-6 py-4 font-medium text-gray-600">{{ server.get('region', 'N/A') }}</td>
+    <td class="px-6 py-4">
+        <div class="flex items-center gap-2">
+            <div class="w-24 bg-gray-200 rounded-full h-2">
+                <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full" style="width: {{ server.get('cpu_percent', 0) }}%"></div>
+            </div>
+            <span class="text-sm font-semibold text-gray-700 w-12">{{ "%.1f"|format(server.get('cpu_percent', 0)) }}%</span>
+        </div>
+    </td>
+    <td class="px-6 py-4">
+        <div class="flex items-center gap-2">
+            <div class="w-24 bg-gray-200 rounded-full h-2">
+                <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style="width: {{ server.get('memory_percent', 0) }}%"></div>
+            </div>
+            <span class="text-sm font-semibold text-gray-700 w-12">{{ "%.1f"|format(server.get('memory_percent', 0)) }}%</span>
+        </div>
+    </td>
+    <td class="px-6 py-4">
+        <div class="flex items-center gap-2">
+            <div class="w-24 bg-gray-200 rounded-full h-2">
+                <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-2 rounded-full" style="width: {{ server.get('disk_utilization', 0) }}%"></div>
+            </div>
+            <span class="text-sm font-semibold text-gray-700 w-12">{{ "%.1f"|format(server.get('disk_utilization', 0)) }}%</span>
+        </div>
+    </td>
+    <td class="px-6 py-4 text-sm font-medium text-gray-600">{{ server.get('uptime_days', 'N/A') }}</td>
+    <td class="px-6 py-4 text-sm">
+        {% if server.get('status') == 'healthy' %}
+            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold border border-green-300">✓ Healthy</span>
+        {% elif server.get('status') == 'warning' %}
+            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold border border-yellow-300">⚠ Warning</span>
+        {% else %}
+            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold border border-red-300">✕ Critical</span>
+        {% endif %}
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="7" class="px-6 py-8 text-center text-gray-500 font-medium">📭 No servers available</td>
+</tr>
+{% endfor %}
+

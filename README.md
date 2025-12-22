@@ -1,311 +1,154 @@
-# Industrial Cloud Data Portfolio Dashboard - COMPLETE ✅
+# Industrial Cloud Data Portfolio Dashboard
 
-Full-stack telemetry dashboard with real-time visualization, REST API, and Docker deployment.
+A comprehensive real-time monitoring dashboard for cloud infrastructure with telemetry data visualization, server/container metrics, and professional profile integration.
 
-## 🎯 Quick Start (3 Commands)
+## Overview
 
-```bash
-cd /path/to/industrial-cloud-data-portfolio
-docker-compose up --build
-# Open http://localhost:5173
-```
+This project provides a full-stack monitoring solution with:
+- **Real-time dashboards** for servers, containers, and services
+- **Data pipeline** for ingesting and transforming telemetry metrics
+- **REST APIs** for accessing infrastructure data
+- **Professional profile page** showcasing CV and portfolio
+- **Docker-based microservices** architecture
 
-## 📊 What's Included
-
-- **30+ REST API Endpoints** (FastAPI)
-- **5 Interactive Dashboards** (React + Recharts)
-- **Real-time WebSocket Streaming**
-- **PostgreSQL Database** (optimized)
-- **Docker Orchestration** (5 services)
-- **100% Tested** (30/30 endpoints passing)
-- **Complete Documentation** (5 guides)
-
-## 📚 Documentation
-
-| Guide | Purpose | Read Time |
-|-------|---------|-----------|
-| [INDEX.md](INDEX.md) | Documentation roadmap | 2-3 min |
-| [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Essential commands | 5-10 min |
-| [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) | Complete overview | 10-15 min |
-| [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | Detailed setup | 20-30 min |
-| [API_DOCUMENTATION.md](API_DOCUMENTATION.md) | API reference | 15-20 min |
-
-## 🏗️ Architecture
-
-```
-Telemetry Data → Generator → Pub/Sub → Ingestion → Storage
-                                          ↓
-                                   Transformer → PostgreSQL
-                                          ↓
-                                   Dashboard API
-                                          ↓
-                              React Frontend (5 Views)
-```
-
-## ✨ Features
-
-### 5 Dashboard Views
-1. **Overview** - System health, KPIs, resource trends
-2. **Servers** - Server health, CPU trends, disk usage
-3. **Services** - Performance, latency, error rates
-4. **Containers** - Health, memory, throughput
-5. **Analytics** - Anomalies, forecasts, capacity
-
-### API Endpoints (30+)
-- 6 Server endpoints
-- 6 Container endpoints  
-- 8 Service endpoints
-- 7 Analytics endpoints
-- 1 WebSocket endpoint
-
-### Real-time Features
-- WebSocket streaming (30s intervals)
-- Live metric updates
-- Multi-client support
-- Automatic reconnection
-
-## 🌐 Access Points
-
-```
-Dashboard Frontend: http://localhost:5173
-API Documentation: http://localhost:8080/docs
-API Base URL:      http://localhost:8080/api
-WebSocket:         ws://localhost:8080/api/ws/metrics
-```
-
-## 🚀 Services
-
-| Service | Status | Technology |
-|---------|--------|-----------|
-| Generator | ✅ | Python 3.11 |
-| Ingestion | ✅ | Python 3.11 |
-| Transformer | ✅ | Python 3.11 |
-| Dashboard API | ✅ | FastAPI 0.104 |
-| Dashboard Frontend | ✅ | React 18.2 + Vite |
-
-## 📊 Technology Stack
-
-**Backend**
-- Python 3.11
-- FastAPI 0.104.1
-- SQLAlchemy 2.0.23
-- PostgreSQL 14
-- Pydantic
+## Tech Stack
 
 **Frontend**
-- React 18.2.0
-- TypeScript
-- Vite 5.0.0
-- Recharts 2.10.3
-- Tailwind CSS 3.3.6
-- Axios 1.6.5
+- FastAPI + Jinja2 templating
+- HTMX for dynamic table updates
+- Tailwind CSS for styling
 
-**DevOps**
-- Docker Compose
-- Google Cloud Platform
-- PostgreSQL Database
+**Backend**
+- FastAPI REST APIs
+- PostgreSQL database
+- SQLAlchemy ORM
 
-## ✅ Verification
+**Data Pipeline**
+- Python telemetry generator
+- GCP Pub/Sub messaging
+- Google Cloud Storage (GCS)
+- Data transformer service
 
-After startup, verify:
-- [ ] Frontend loads: http://localhost:5173
-- [ ] API docs: http://localhost:8080/docs
-- [ ] All 5 views display data
-- [ ] Charts rendering correctly
-- [ ] WebSocket active in DevTools
-- [ ] No console errors
-
-## 🔧 Configuration
-
-Create `.env` file:
-```env
-DB_HOST=localhost
-DB_NAME=telemetry
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_PORT=5432
-GCP_PROJECT_ID=your-project-id
-GCP_BUCKET_NAME=your-bucket
-```
-
-## 📈 Performance
-
-| Metric | Value |
-|--------|-------|
-| API Response | <100ms |
-| Frontend Bundle | ~500KB |
-| Database Queries | Indexed |
-| Real-time Updates | 30s intervals |
-| Test Success | 100% (30/30) |
-
-## 🎓 Project Statistics
-
-- **Total Code**: 5000+ lines
-- **Python Files**: 15+
-- **React Files**: 10+
-- **Documentation**: 2000+ lines
-- **API Endpoints**: 30+
-- **Database Tables**: 3
-- **Docker Services**: 5
-
-## 🔐 Security
-
-- ✅ URL-encoded database passwords
-- ✅ Parameterized SQL queries
-- ✅ CORS properly configured
-- ✅ Environment variable protection
-- ✅ No hardcoded secrets
-- ✅ Proper error handling
-
-## 📋 Project Structure
-
-```
-industrial-cloud-data-portfolio/
-│
-├── services/               # Microservices
-│   ├── generator/         # Telemetry data generator
-│   │   ├── config/
-│   │   │   ├── service-account.json  # Generator service account
-│   │   │   └── README.md
-│   │   ├── __init__.py
-│   │   ├── generator_service.py
-│   │   ├── main.py       # Standalone entry point
-│   │   └── Dockerfile
-│   │
-│   ├── ingestion/         # Data ingestion & storage
-│   │   ├── config/
-│   │   │   ├── service-account.json  # Ingestion service account
-│   │   │   └── README.md
-│   │   ├── __init__.py
-│   │   ├── ingestion_service.py
-│   │   ├── main.py       # Standalone entry point
-│   │   └── Dockerfile
-│   │
-│   └── transformer/       # ETL to PostgreSQL
-│       ├── config/
-│       │   ├── service-account.json  # Transformer service account
-│       │   └── README.md
-│       ├── __init__.py
-│       ├── transformer_service.py
-│       ├── main.py       # Standalone entry point
-│       └── Dockerfile
-│
-├── shared/                # Shared utilities
-│   ├── __init__.py
-│   └── gcp_pubsub.py     # GCP Pub/Sub broker
-│
-├── scripts/               # Deployment scripts
-│   ├── run_microservices.ps1
-│   ├── deploy_generator.sh
-│   └── deploy_ingestion.sh
-│
-├── docker-compose.yml     # Run all services
-├── .env.example           # Environment variables template
-├── requirements.txt       # Python dependencies
-└── SIMPLE_SETUP.md       # Setup guide
-```
-
-## Architecture
-
-```
-Generator Service → GCP Pub/Sub Topics → Ingestion Service → Cloud Storage
-                                                                     ↓
-                                            Transformer Service → PostgreSQL
-```
-
-- **Generator**: Produces server, container, and service telemetry metrics
-- **Pub/Sub**: Event streaming broker (3 topics: server-metrics, container-metrics, service-metrics)
-- **Ingestion**: Validates and stores metrics to Cloud Storage as JSONL
-- **Transformer**: ETL service - Extracts from Cloud Storage, transforms data, loads to PostgreSQL
+**Infrastructure**
+- Docker & Docker Compose
+- PostgreSQL 15
+- Python 3.11
 
 ## Quick Start
 
-### Setup Service Accounts
+### Prerequisites
+- Docker Desktop (Windows/Mac) or Docker Engine (Linux)
+- 4GB RAM minimum
+- 10GB disk space
 
-Each service needs its own service account key in `services/{service}/config/service-account.json`.
+### Setup & Installation
 
-See:
-- `services/generator/config/README.md` - Generator permissions
-- `services/ingestion/config/README.md` - Ingestion permissions
-- `services/transformer/config/README.md` - Transformer permissions (Cloud SQL access)
+See [SETUP.md](SETUP.md) for detailed initial setup instructions.
 
-### Setup Environment
-
-Create `.env` file for database configuration:
-```bash
-cp .env.example .env
-# Edit .env with your Cloud SQL connection details
-```
-
-### Option 1: Run with Docker (Recommended)
-
+**Quick commands:**
 ```powershell
-# Build and start both services
-docker-compose up --build
-
-# Or run in background
-docker-compose up -d --build
+cd D:\work\industrial-cloud-data-portfolio
+docker-compose up -d
 ```
 
-See [DOCKER.md](DOCKER.md) for detailed Docker instructions.
+Wait 30 seconds for services to initialize, then:
+- Frontend: http://localhost:8000
+- API Docs: http://localhost:8080/docs
+- Dashboard: http://localhost:8000/dashboard
 
-### Option 2: Run Locally (Python)
+### Rebuild & Restart
 
-Services auto-detect credentials from their config folders:
+See [REBUILD_GUIDE.md](REBUILD_GUIDE.md) for complete rebuild instructions.
 
-```powershell
-# Run both microservices in separate terminals
-.\scripts\run_microservices.ps1
+## Features
+
+### Dashboard Sections
+
+**Home** - Navigation to all sections with status cards
+
+**Servers** - Real-time server metrics
+- CPU, memory, disk utilization
+- Server status and uptime
+- Auto-refreshing every 30 seconds
+
+**Containers** - Docker container monitoring
+- Container IDs and service names
+- CPU/memory usage with progress bars
+- Health status badges
+
+**Profile** - Professional CV/Portfolio page
+- Professional summary
+- Skills showcase
+- Work experience
+- Portfolio projects
+- Education and certifications
+
+## Services
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| **dashboard-frontend** | 8000 | Web UI and static content |
+| **dashboard-api** | 8080 | REST APIs and database |
+| **generator** | — | Generates telemetry data |
+| **ingestion** | — | Ingests data to GCS |
+| **transformer** | — | Transforms & loads to DB |
+
+## Project Structure
+
+```
+industrial-cloud-data-portfolio/
+├── services/
+│   ├── dashboard-frontend/
+│   ├── dashboard-api/
+│   ├── generator/
+│   ├── ingestion/
+│   └── transformer/
+├── shared/
+├── docker-compose.yml
+├── REBUILD_GUIDE.md
+├── SETUP.md
+└── README.md
 ```
 
-Or run manually:
+## Documentation
 
-```powershell
-# Terminal 1: Generator (auto-detects config/service-account.json)
-cd services/generator
-$env:GCP_PROJECT_ID = "industrial-cloud-data"
-python main.py
+- **[README.md](README.md)** - This file (project overview)
+- **[SETUP.md](SETUP.md)** - Initial setup and installation
+- **[REBUILD_GUIDE.md](REBUILD_GUIDE.md)** - Docker rebuild instructions
 
-# Terminal 2: Ingestion (auto-detects config/service-account.json)
-cd services/ingestion
-$env:GCP_PROJECT_ID = "industrial-cloud-data"
-$env:GCP_BUCKET_NAME = "telemetry-data007"
-python main.py
-```
+## Development
 
-### Option 3: Deploy to Cloud Run (Production)
+### Making Changes
 
-```bash
-bash scripts/deploy_generator.sh
-bash scripts/deploy_ingestion.sh
-```
+1. **Frontend** - Modify templates in `services/dashboard-frontend/templates/`
+2. **Backend** - Edit routes in `services/dashboard-api/routers/`
+3. **Generator** - Update `services/generator/generator_service.py`
 
-## Adding New Services
+After changes, rebuild affected service (see REBUILD_GUIDE.md).
 
-Create a new folder under `services/`:
+### Database
 
-```
-services/
-└── your_service/
-    ├── __init__.py
-    └── your_service.py
-```
+PostgreSQL persists data in Docker volumes. Data survives rebuilds unless explicitly deleted.
 
-Import shared utilities from `shared/` package.
+## Troubleshooting
 
-## Data Schema
+**Services not starting?**
+- Check Docker Desktop is running
+- Verify ports 8000 and 8080 are not in use
+- Check logs: `docker-compose logs`
 
-### Server Metrics (11 fields)
-- timestamp, server_id, region, environment
-- cpu_percent, memory_percent, memory_used/total_gb, disk_used/total_gb, status
+**Database connection error?**
+- Wait 30 seconds after startup
+- Restart all services: `docker-compose restart`
 
-### Container Metrics (13 fields)
-- timestamp, container_id, service_name, version, environment
-- cpu_percent, memory_mb, memory_limit_mb, requests_per_sec, response_time_ms
-- error_count, restart_count, health
+**Performance issues?**
+- Check resource usage: `docker stats`
+- Rebuild with fresh cache: See REBUILD_GUIDE.md
 
-### Service Metrics (13 fields)
-- timestamp, service_name, version, environment, region
-- total_requests, failed_requests, error_rate_percent
-- avg_response_time_ms, p95_response_time_ms, instances_running
-- cpu_avg_percent, memory_avg_percent
+## License
+
+Portfolio project demonstrating cloud monitoring and full-stack development.
+
+---
+
+**Last Updated**: December 22, 2025

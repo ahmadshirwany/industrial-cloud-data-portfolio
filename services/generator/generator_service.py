@@ -14,13 +14,13 @@ class TelemetryGeneratorService:
     def __init__(self, pubsub):
         self.pubsub = pubsub
         
-        # Configuration - Optimized for cost
-        self.services = ["API", "DB", "Cache", "Queue"]  # Reduced from 5
-        self.regions = ["us-east-1", "eu-west-1"]  # Reduced from 3
+        # Configuration - Optimized for database preservation
+        self.services = ["API", "DB", "Cache"]  # Reduced from 4 to 3
+        self.regions = ["us-east-1"]  # Single region (consolidated)
         self.environments = ["production"]  # Only production (staging less critical)
-        self.servers = [f"server-{i:02d}" for i in range(1, 4)]  # Reduced from 5 to 3
-        self.containers = [f"container-{i:03d}" for i in range(1, 6)]  # Reduced from 10 to 5
-        self.service_versions = ["v1.3.0", "v2.0.0"]  # Reduced from 3
+        self.servers = [f"server-{i:02d}" for i in range(1, 3)]  # Reduced from 3 to 2
+        self.containers = [f"container-{i:02d}" for i in range(1, 11)]  # 10 unique containers for variety
+        self.service_versions = ["v2.0.0"]  # Single version
         
         self.generated_count = 0
     
@@ -42,6 +42,11 @@ class TelemetryGeneratorService:
     
     def generate_container_metric(self) -> dict:
         """Generate a single container metric"""
+        # Choose memory limit first
+        memory_limit_mb = random.choice([512, 1024, 2048])
+        # Memory used should not exceed the limit
+        memory_mb = random.randint(50, int(memory_limit_mb * 0.9))
+        
         return {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "container_id": random.choice(self.containers),
@@ -49,8 +54,8 @@ class TelemetryGeneratorService:
             "version": random.choice(self.service_versions),
             "environment": random.choice(self.environments),
             "cpu_percent": round(random.uniform(5, 90), 2),
-            "memory_mb": random.randint(100, 2000),
-            "memory_limit_mb": random.choice([512, 1024, 2048]),
+            "memory_mb": memory_mb,
+            "memory_limit_mb": memory_limit_mb,
             "requests_per_sec": random.randint(10, 500),
             "response_time_ms": round(random.uniform(50, 2000), 2),
             "error_count": random.randint(0, 20),

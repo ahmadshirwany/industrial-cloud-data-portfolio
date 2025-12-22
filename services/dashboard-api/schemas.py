@@ -45,6 +45,7 @@ class ContainerMetricBase(BaseModel):
     timestamp: datetime
     container_id: str
     service_name: Optional[str] = None
+    cpu_percent: Optional[float] = None
     memory_utilization: Optional[float] = None
     requests_per_sec: Optional[int] = None
     health: Optional[str] = None
