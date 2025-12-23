@@ -1,154 +1,280 @@
-# Industrial Cloud Data Portfolio Dashboard
+# Industrial Cloud Data Portfolio
 
-A comprehensive real-time monitoring dashboard for cloud infrastructure with telemetry data visualization, server/container metrics, and professional profile integration.
+A production-ready cloud data pipeline with real-time monitoring dashboard, microservices architecture, and continuous telemetry processing.
 
 ## Overview
 
-This project provides a full-stack monitoring solution with:
-- **Real-time dashboards** for servers, containers, and services
-- **Data pipeline** for ingesting and transforming telemetry metrics
-- **REST APIs** for accessing infrastructure data
-- **Professional profile page** showcasing CV and portfolio
-- **Docker-based microservices** architecture
+This project provides an industrial-grade telemetry system with:
+- **Real-time dashboards** for monitoring infrastructure metrics
+- **Continuous data pipeline** with Pub/Sub and Cloud Storage integration
+- **FastAPI REST APIs** for accessing transformed telemetry data
+- **Microservices architecture** with Flask HTTP servers and background workers
+- **PostgreSQL database** for storing processed metrics
+- **Docker & Cloud Run** deployment on Google Cloud Platform
 
 ## Tech Stack
 
 **Frontend**
-- FastAPI + Jinja2 templating
-- HTMX for dynamic table updates
+- Flask with Jinja2 templating
+- HTMX for dynamic updates
 - Tailwind CSS for styling
 
-**Backend**
+**Backend & APIs**
 - FastAPI REST APIs
-- PostgreSQL database
+- Flask HTTP servers (Generator, Ingestion, Transformer)
+- PostgreSQL 15 database
 - SQLAlchemy ORM
 
 **Data Pipeline**
-- Python telemetry generator
-- GCP Pub/Sub messaging
-- Google Cloud Storage (GCS)
-- Data transformer service
+- Synthetic telemetry generator (Flask + threading)
+- GCP Pub/Sub for message streaming
+- Google Cloud Storage for data staging
+- ETL transformer service (Flask + threading)
 
-**Infrastructure**
-- Docker & Docker Compose
-- PostgreSQL 15
+**Cloud & Infrastructure**
+- Google Cloud Platform (GCP)
+- Cloud Run Services (for microservices)
+- Cloud SQL (PostgreSQL database)
+- Artifact Registry (Docker images)
+- Docker & Docker Compose (local development)
 - Python 3.11
 
 ## Quick Start
 
 ### Prerequisites
-- Docker Desktop (Windows/Mac) or Docker Engine (Linux)
+- Docker Desktop (local development)
+- GCP Project with credentials (for cloud deployment)
 - 4GB RAM minimum
 - 10GB disk space
 
-### Setup & Installation
+### Local Development
 
-See [SETUP.md](SETUP.md) for detailed initial setup instructions.
-
-**Quick commands:**
-```powershell
-cd D:\work\industrial-cloud-data-portfolio
+```bash
+# Start all services locally
 docker-compose up -d
+
+# Wait 3 seconds, then test health endpoints
+curl http://localhost:8001/health   # Generator
+curl http://localhost:8002/health   # Ingestion
+curl http://localhost:8003/health   # Transformer
+curl http://localhost:8080/        # Dashboard API
+
+# View logs
+docker-compose logs -f generator
+docker-compose logs -f ingestion
+docker-compose logs -f transformer
+
+# Stop all services
+docker-compose down
 ```
 
-Wait 30 seconds for services to initialize, then:
+**Access Points:**
 - Frontend: http://localhost:8000
-- API Docs: http://localhost:8080/docs
-- Dashboard: http://localhost:8000/dashboard
+- API: http://localhost:8080
+- Generator Health: http://localhost:8001/health
+- Ingestion Health: http://localhost:8002/health
+- Transformer Health: http://localhost:8003/health
 
-### Rebuild & Restart
+### Cloud Deployment
 
-See [REBUILD_GUIDE.md](REBUILD_GUIDE.md) for complete rebuild instructions.
+Services are deployed to Google Cloud Run:
 
-## Features
+```bash
+# Generator Service
+https://generator-esne4epeha-uc.a.run.app
 
-### Dashboard Sections
+# Ingestion Service
+https://ingestion-esne4epeha-uc.a.run.app
 
-**Home** - Navigation to all sections with status cards
+# Transformer Service
+https://transformer-esne4epeha-uc.a.run.app
 
-**Servers** - Real-time server metrics
-- CPU, memory, disk utilization
-- Server status and uptime
-- Auto-refreshing every 30 seconds
+# Dashboard API
+https://dashboard-api-esne4epeha-uc.a.run.app
 
-**Containers** - Docker container monitoring
-- Container IDs and service names
-- CPU/memory usage with progress bars
-- Health status badges
+# Dashboard Frontend
+https://dashboard-frontend-esne4epeha-uc.a.run.app
+```
 
-**Profile** - Professional CV/Portfolio page
-- Professional summary
-- Skills showcase
-- Work experience
-- Portfolio projects
-- Education and certifications
+## Architecture
 
-## Services
+### Data Flow
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| **dashboard-frontend** | 8000 | Web UI and static content |
-| **dashboard-api** | 8080 | REST APIs and database |
-| **generator** | — | Generates telemetry data |
-| **ingestion** | — | Ingests data to GCS |
-| **transformer** | — | Transforms & loads to DB |
+```
+Generator Service (Pub/Sub)
+    ↓
+Ingestion Service (Cloud Storage)
+    ↓
+Transformer Service (PostgreSQL)
+    ↓
+Dashboard API (REST endpoints)
+    ↓
+Dashboard Frontend (Web UI)
+```
+
+### Services
+
+| Service | Type | Port (Local) | Purpose |
+|---------|------|-------------|---------|
+| **Generator** | Cloud Run Service | 8001 | Generates synthetic telemetry data |
+| **Ingestion** | Cloud Run Service | 8002 | Consumes from Pub/Sub → Cloud Storage |
+| **Transformer** | Cloud Run Service | 8003 | ETL: Cloud Storage → PostgreSQL |
+| **Dashboard API** | Cloud Run Service | 8080 | REST API for telemetry data |
+| **Dashboard Frontend** | Cloud Run Service | 8000 | Web dashboard UI |
+
+## Services Architecture
+
+Each microservice (Generator, Ingestion, Transformer) uses:
+- **Flask HTTP server** - Listens on PORT environment variable (Cloud Run compatible)
+- **Background daemon thread** - Runs continuous work loop independently
+- **Health check endpoint** - `GET /health` returns service status
+- **Root endpoint** - `GET /` returns service description
+
+This architecture enables:
+- 24/7 continuous operation (unlike Cloud Run Jobs which timeout after 1 hour)
+- HTTP monitoring and health checks
+- Graceful integration with Cloud Run Services
+- Identical behavior in local and cloud environments
 
 ## Project Structure
 
 ```
 industrial-cloud-data-portfolio/
 ├── services/
-│   ├── dashboard-frontend/
-│   ├── dashboard-api/
-│   ├── generator/
-│   ├── ingestion/
-│   └── transformer/
-├── shared/
-├── docker-compose.yml
-├── REBUILD_GUIDE.md
-├── SETUP.md
-└── README.md
+│   ├── dashboard-api/          # FastAPI REST API server
+│   ├── dashboard-frontend/     # Flask web UI
+│   ├── generator/              # Telemetry generator (Flask + threading)
+│   ├── ingestion/              # Pub/Sub consumer (Flask + threading)
+│   └── transformer/            # ETL pipeline (Flask + threading)
+├── shared/                     # Shared utilities and GCP broker
+├── scripts/                    # Deployment scripts
+├── docker-compose.yml          # Local development composition
+├── requirements.txt            # Python dependencies
+├── .env                        # Environment variables (GCP config)
+└── README.md                   # This file
 ```
-
-## Documentation
-
-- **[README.md](README.md)** - This file (project overview)
-- **[SETUP.md](SETUP.md)** - Initial setup and installation
-- **[REBUILD_GUIDE.md](REBUILD_GUIDE.md)** - Docker rebuild instructions
 
 ## Development
 
-### Making Changes
+### Local Development Commands
 
-1. **Frontend** - Modify templates in `services/dashboard-frontend/templates/`
-2. **Backend** - Edit routes in `services/dashboard-api/routers/`
-3. **Generator** - Update `services/generator/generator_service.py`
+```bash
+# Build all Docker images
+docker-compose build
 
-After changes, rebuild affected service (see REBUILD_GUIDE.md).
+# Build with no cache
+docker-compose build --no-cache
+
+# View real-time logs
+docker-compose logs -f
+
+# Run specific service logs
+docker-compose logs -f generator
+
+# Rebuild single service
+docker-compose build generator
+
+# Stop all containers
+docker-compose stop
+
+# Remove all containers and volumes
+docker-compose down -v
+```
+
+### Environment Variables
+
+Required in `.env` for cloud deployment:
+```
+DB_HOST=<PostgreSQL IP>
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=<password>
+DB_PORT=5432
+GCP_PROJECT_ID=industrial-cloud-data
+GCP_BUCKET_NAME=telemetry-data007
+```
 
 ### Database
 
-PostgreSQL persists data in Docker volumes. Data survives rebuilds unless explicitly deleted.
+PostgreSQL stores:
+- `server_metrics` - Server CPU, memory, disk data
+- `container_metrics` - Container performance data
+- `service_metrics` - Service-level metrics
+
+## Monitoring
+
+### Health Checks (Local)
+```bash
+# All services respond to health checks
+curl http://localhost:8001/health  # {"service":"generator","status":"healthy"...}
+curl http://localhost:8002/health  # {"service":"ingestion","status":"healthy"...}
+curl http://localhost:8003/health  # {"service":"transformer","status":"healthy"...}
+```
+
+### Cloud Run Services
+Services are monitored via:
+- Cloud Run service URLs with health endpoints
+- Cloud Run logs (real-time)
+- Cloud Monitoring dashboards
+- Container logs in Cloud Logging
 
 ## Troubleshooting
 
-**Services not starting?**
-- Check Docker Desktop is running
-- Verify ports 8000 and 8080 are not in use
-- Check logs: `docker-compose logs`
+**Services not starting locally?**
+```bash
+# Check Docker is running
+docker ps
 
-**Database connection error?**
-- Wait 30 seconds after startup
-- Restart all services: `docker-compose restart`
+# View service logs
+docker-compose logs generator
+
+# Restart all services
+docker-compose restart
+```
+
+**Database connection issues?**
+```bash
+# Check container can reach database
+docker exec telemetry-transformer ping <DB_HOST>
+
+# Verify environment variables
+docker inspect telemetry-transformer | grep -A 20 "Env"
+```
 
 **Performance issues?**
-- Check resource usage: `docker stats`
-- Rebuild with fresh cache: See REBUILD_GUIDE.md
+```bash
+# Check container resource usage
+docker stats
+
+# View detailed service logs
+docker-compose logs -f <service-name>
+```
+
+## Deployment
+
+### To Google Cloud Run
+
+1. **Push updated Docker images:**
+```bash
+docker tag <service>:latest us-central1-docker.pkg.dev/<project>/<repo>/<service>:latest
+docker push us-central1-docker.pkg.dev/<project>/<repo>/<service>:latest
+```
+
+2. **Deploy service:**
+```bash
+gcloud run deploy <service> \
+  --image=us-central1-docker.pkg.dev/<project>/<repo>/<service>:latest \
+  --region=us-central1 \
+  --memory=512Mi \
+  --set-env-vars='GCP_PROJECT_ID=<project>,GCP_BUCKET_NAME=<bucket>' \
+  --allow-unauthenticated
+```
 
 ## License
 
-Portfolio project demonstrating cloud monitoring and full-stack development.
+Portfolio project demonstrating cloud data engineering and microservices architecture.
 
 ---
 
-**Last Updated**: December 22, 2025
+**Last Updated:** December 23, 2025
+**Status:** Production - All services running on Google Cloud Run
