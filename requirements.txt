@@ -2,5 +2,8 @@
 google-cloud-pubsub>=2.18.0
 google-cloud-storage>=2.10.0
 
+# HTTP Server for Cloud Run Services
+flask>=2.3.0
+
 # PostgreSQL for Transformer Service
 psycopg2-binary>=2.9.9

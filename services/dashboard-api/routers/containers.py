@@ -58,13 +58,7 @@ async def get_current_containers(
     Get current state of all containers
     """
     query = text("""
-        WITH latest AS (
-            SELECT container_id, MAX(timestamp) as max_time
-            FROM container_metrics
-            WHERE timestamp > NOW() - INTERVAL '10 minutes'
-            GROUP BY container_id
-        )
-        SELECT 
+        SELECT DISTINCT ON (c.container_id)
             c.timestamp,
             c.container_id,
             c.service_name,
@@ -73,8 +67,8 @@ async def get_current_containers(
             c.requests_per_sec,
             c.health
         FROM container_metrics c
-        INNER JOIN latest l ON c.container_id = l.container_id AND c.timestamp = l.max_time
-        ORDER BY c.memory_utilization DESC
+        WHERE c.timestamp > NOW() - INTERVAL '10 minutes'
+        ORDER BY c.container_id, c.timestamp DESC
         LIMIT :limit
     """)
     

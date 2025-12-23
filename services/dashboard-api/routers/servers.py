@@ -63,13 +63,7 @@ async def get_current_servers(
     Get current state of all servers (most recent metrics)
     """
     query = text("""
-        WITH latest AS (
-            SELECT server_id, MAX(timestamp) as max_time
-            FROM server_metrics
-            WHERE timestamp > NOW() - INTERVAL '10 minutes'
-            GROUP BY server_id
-        )
-        SELECT 
+        SELECT DISTINCT ON (s.server_id)
             s.timestamp,
             s.server_id,
             s.region,
@@ -79,8 +73,8 @@ async def get_current_servers(
             s.disk_utilization,
             s.status
         FROM server_metrics s
-        INNER JOIN latest l ON s.server_id = l.server_id AND s.timestamp = l.max_time
-        ORDER BY s.cpu_percent DESC
+        WHERE s.timestamp > NOW() - INTERVAL '10 minutes'
+        ORDER BY s.server_id, s.timestamp DESC
         LIMIT :limit
     """)
     

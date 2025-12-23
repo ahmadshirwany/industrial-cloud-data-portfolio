@@ -1,79 +1,107 @@
 version: '3.8'
 
 services:
+  # Generator: Publishes synthetic telemetry to Pub/Sub
   generator:
     build:
       context: .
       dockerfile: services/generator/Dockerfile
+    container_name: telemetry-generator
+    ports:
+      - "8001:8080"
     environment:
       - GCP_PROJECT_ID=industrial-cloud-data
       - GOOGLE_APPLICATION_CREDENTIALS=/app/config/service-account.json
+      - PORT=8080
     volumes:
       - ./services/generator/config:/app/config:ro
     restart: unless-stopped
-    container_name: telemetry-generator
+    networks:
+      - telemetry-network
 
+  # Ingestion: Consumes from Pub/Sub, stores to Cloud Storage
   ingestion:
     build:
       context: .
       dockerfile: services/ingestion/Dockerfile
+    container_name: telemetry-ingestion
+    ports:
+      - "8002:8080"
     environment:
       - GCP_PROJECT_ID=industrial-cloud-data
       - GCP_BUCKET_NAME=telemetry-data007
       - GOOGLE_APPLICATION_CREDENTIALS=/app/config/service-account.json
+      - PORT=8080
     volumes:
       - ./services/ingestion/config:/app/config:ro
     restart: unless-stopped
-    container_name: telemetry-ingestion
     depends_on:
       - generator
+    networks:
+      - telemetry-network
 
+  # Transformer: ETL pipeline - extracts from Cloud Storage, loads to PostgreSQL
   transformer:
     build:
       context: .
       dockerfile: services/transformer/Dockerfile
+    container_name: telemetry-transformer
+    ports:
+      - "8003:8000"
     environment:
       - GCP_PROJECT_ID=industrial-cloud-data
       - GCP_BUCKET_NAME=telemetry-data007
       - GOOGLE_APPLICATION_CREDENTIALS=/app/config/service-account.json
       - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME:-telemetry}
+      - DB_NAME=${DB_NAME:-postgres}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_PORT=${DB_PORT:-5432}
+      - PORT=8000
     volumes:
       - ./services/transformer/config:/app/config:ro
     restart: unless-stopped
-    container_name: telemetry-transformer
     depends_on:
       - ingestion
+    networks:
+      - telemetry-network
 
+  # Dashboard API: REST API for serving telemetry data
   dashboard-api:
     build:
       context: .
       dockerfile: services/dashboard-api/Dockerfile
+    container_name: dashboard-api
+    ports:
+      - "8080:8080"
     environment:
       - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME:-telemetry}
+      - DB_NAME=${DB_NAME:-postgres}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_PORT=${DB_PORT:-5432}
-    ports:
-      - "8080:8080"
     restart: unless-stopped
-    container_name: dashboard-api
     depends_on:
       - transformer
+    networks:
+      - telemetry-network
 
+  # Dashboard Frontend: Web UI for visualizing data
   dashboard-frontend:
     build:
       context: .
       dockerfile: services/dashboard-frontend/Dockerfile
+    container_name: dashboard-frontend
     ports:
       - "8000:8000"
     environment:
       - API_BASE_URL=http://dashboard-api:8080
     restart: unless-stopped
-    container_name: dashboard-frontend
     depends_on:
       - dashboard-api
+    networks:
+      - telemetry-network
+
+networks:
+  telemetry-network:
+    driver: bridge
