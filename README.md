@@ -1,16 +1,24 @@
 # Industrial Cloud Data Portfolio
 
-A production-ready cloud data pipeline with real-time monitoring dashboard, microservices architecture, and continuous telemetry processing.
+A production-ready cloud data pipeline with real-time monitoring dashboard, microservices architecture, and continuous telemetry processing deployed on Google Cloud Run.
+
+## 🌐 Live Deployment
+
+**Dashboard Frontend:** https://dashboard-frontend-<project-id>-uc.a.run.app  
+**Dashboard API:** https://dashboard-api-<project-id>-uc.a.run.app  
+**API Documentation:** https://dashboard-api-<project-id>-uc.a.run.app/docs
+
+> Replace `<project-id>` with your GCP project ID. Services are deployed automatically via GitHub Actions on push to `main` branch.
 
 ## Overview
 
-This project provides an industrial-grade telemetry system with:
+This project demonstrates an industrial-grade telemetry system with:
 - **Real-time dashboards** for monitoring infrastructure metrics
-- **Continuous data pipeline** with Pub/Sub and Cloud Storage integration
-- **FastAPI REST APIs** for accessing transformed telemetry data
-- **Microservices architecture** with Flask HTTP servers and background workers
+- **Continuous data pipeline** with Pub/Sub and Cloud Storage
+- **FastAPI REST APIs** with automatic OpenAPI documentation
+- **Microservices architecture** with independent scaling
 - **PostgreSQL database** for storing processed metrics
-- **Docker & Cloud Run** deployment on Google Cloud Platform
+- **Automated CI/CD** with GitHub Actions and Cloud Run
 
 ## Tech Stack
 
@@ -69,34 +77,14 @@ docker-compose down
 ```
 
 **Access Points:**
-- Frontend: http://localhost:8000
-- API: http://localhost:8080
-- Generator Health: http://localhost:8001/health
-- Ingestion Health: http://localhost:8002/health
-- Transformer Health: http://localhost:8003/health
+- **Dashboard:** http://localhost:8000
+- **API:** http://localhost:8080
+- **API Docs:** http://localhost:8080/docs
+- Generator: http://localhost:8001/health
+- Ingestion: http://localhost:8002/health
+- Transformer: http://localhost:8003/health
 
-### Cloud Deployment
-
-Services are deployed to Google Cloud Run with automatic CI/CD:
-
-```bash
-# Generator Service
-https://generator-esne4epeha-uc.a.run.app
-
-# Ingestion Service
-https://ingestion-esne4epeha-uc.a.run.app
-
-# Transformer Service
-https://transformer-esne4epeha-uc.a.run.app
-
-# Dashboard API
-https://dashboard-api-esne4epeha-uc.a.run.app
-
-# Dashboard Frontend
-https://dashboard-frontend-esne4epeha-uc.a.run.app
-```
-
-#### Automatic Deployment (CI/CD)
+## Automated Deployment
 
 Every push to `main` or `develop` branch automatically deploys all services to Cloud Run.
 
@@ -116,29 +104,20 @@ gcloud iam service-accounts create github-actions-runner --display-name="GitHub 
 
 # 3. Push code
 git push origin main
-```
+```## Automated Deployment
 
-**Workflow status:** GitHub Actions tab → Deploy to Cloud Run
+Every push to `main` branch triggers GitHub Actions to:
+1. Build Docker images from project root
+2. Push to Google Artifact Registry
+3. Deploy all services to Cloud Run
 
-## Architecture
+**Required GitHub Secrets:**
+- `GCP_PROJECT_ID` - Your GCP project ID
+- `GCP_SA_KEY` - Service account JSON key
+- `GCP_BUCKET_NAME` - Cloud Storage bucket name
+- `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT` - PostgreSQL credentials
 
-### Data Flow
-
-```
-Generator Service (Pub/Sub)
-    ↓
-Ingestion Service (Cloud Storage)
-    ↓
-Transformer Service (PostgreSQL)
-    ↓
-Dashboard API (REST endpoints)
-    ↓
-Dashboard Frontend (Web UI)
-```
-
-### Services
-
-| Service | Type | Port (Local) | Purpose |
+**Monitor Deployments:** GitHub Actions tab → "Deploy to Cloud Run"
 |---------|------|-------------|---------|
 | **Generator** | Cloud Run Service | 8001 | Generates synthetic telemetry data |
 | **Ingestion** | Cloud Run Service | 8002 | Consumes from Pub/Sub → Cloud Storage |
@@ -157,17 +136,17 @@ Each microservice (Generator, Ingestion, Transformer) uses:
 This architecture enables:
 - 24/7 continuous operation (unlike Cloud Run Jobs which timeout after 1 hour)
 - HTTP monitoring and health checks
-- Graceful integration with Cloud Run Services
-- Identical behavior in local and cloud environments
+- Graceful integrauses:
+- **Flask HTTP server** - Cloud Run compatible with PORT environment variable
+- **Background daemon thread** - Continuous processing without timeout
+- **Health endpoints** - `GET /health` for monitoring
+- **Graceful shutdown** - Proper signal handling
 
-## Project Structure
-
-```
-industrial-cloud-data-portfolio/
-├── services/
-│   ├── dashboard-api/          # FastAPI REST API server
-│   ├── dashboard-frontend/     # Flask web UI
-│   ├── generator/              # Telemetry generator (Flask + threading)
+**Key Benefits:**
+- 24/7 continuous operation (unlike Cloud Run Jobs)
+- HTTP health checks and monitoring
+- Identical behavior locally and in cloud
+- Independent scaling per servicer (Flask + threading)
 │   ├── ingestion/              # Pub/Sub consumer (Flask + threading)
 │   └── transformer/            # ETL pipeline (Flask + threading)
 ├── shared/                     # Shared utilities and GCP broker
@@ -189,42 +168,20 @@ docker-compose build
 # Build with no cache
 docker-compose build --no-cache
 
-# View real-time logs
-docker-compose logs -f
+# ViEnvironment Variables
 
-# Run specific service logs
-docker-compose logs -f generator
+Create a `.env` file with:
+```bash
+# GCP Configuration
+GCP_PROJECT_ID=your-project-id
+GCP_BUCKET_NAME=your-bucket-name
 
-# Rebuild single service
-docker-compose build generator
-
-# Stop all containers
-docker-compose stop
-
-# Remove all containers and volumes
-docker-compose down -v
-```
-
-### Environment Variables
-
-Required in `.env` for cloud deployment:
-```
-DB_HOST=<PostgreSQL IP>
+# PostgreSQL Configuration
+DB_HOST=your-db-host
 DB_NAME=postgres
 DB_USER=postgres
-DB_PASSWORD=<password>
+DB_PASSWORD=your-password
 DB_PORT=5432
-GCP_PROJECT_ID=industrial-cloud-data
-GCP_BUCKET_NAME=telemetry-data007
-```
-
-### Database
-
-PostgreSQL stores:
-- `server_metrics` - Server CPU, memory, disk data
-- `container_metrics` - Container performance data
-- `service_metrics` - Service-level metrics
-
 ## Monitoring
 
 ### Health Checks (Local)
@@ -240,65 +197,46 @@ Services are monitored via:
 - Cloud Run service URLs with health endpoints
 - Cloud Run logs (real-time)
 - Cloud Monitoring dashboards
-- Container logs in Cloud Logging
+- Conocker Commands
 
-## Troubleshooting
-
-**Services not starting locally?**
 ```bash
-# Check Docker is running
-docker ps
+# Start all services
+docker-compose up -d
 
-# View service logs
-docker-compose logs generator
+# View logs
+docker-compos & Troubleshooting
 
-# Restart all services
+### Health Checks
+```bash
+# Local services
+curl http://localhost:8001/health  # Generator
+curl http://localhost:8002/health  # Ingestion  
+curl http://localhost:8003/health  # Transformer
+curl http://localhost:8080/health  # Dashboard API
+
+# Cloud Run (replace <url> with actual service URL)
+curl https://<service-url>/health
+```
+
+### Common Issues
+
+**Services not starting?**
+```bash
+docker-compose logs <service-name>
 docker-compose restart
 ```
 
-**Database connection issues?**
-```bash
-# Check container can reach database
-docker exec telemetry-transformer ping <DB_HOST>
+**Database connection failed?**
+- Verify `.env` has correct DB credentials
+- Check Cloud SQL instance is running
+- Ensure authorized networks include your IP
 
-# Verify environment variables
-docker inspect telemetry-transformer | grep -A 20 "Env"
-```
-
-**Performance issues?**
-```bash
-# Check container resource usage
-docker stats
-
-# View detailed service logs
-docker-compose logs -f <service-name>
-```
-
-## Deployment
-
-### To Google Cloud Run
-
-1. **Push updated Docker images:**
-```bash
-docker tag <service>:latest us-central1-docker.pkg.dev/<project>/<repo>/<service>:latest
-docker push us-central1-docker.pkg.dev/<project>/<repo>/<service>:latest
-```
-
-2. **Deploy service:**
-```bash
-gcloud run deploy <service> \
-  --image=us-central1-docker.pkg.dev/<project>/<repo>/<service>:latest \
-  --region=us-central1 \
-  --memory=512Mi \
-  --set-env-vars='GCP_PROJECT_ID=<project>,GCP_BUCKET_NAME=<bucket>' \
-  --allow-unauthenticated
-```
-
-## License
-
-Portfolio project demonstrating cloud data engineering and microservices architecture.
+**Build failures?**
+- Clear Docker cache: `docker-compose build --no-cache`
+- Check all requirements.txt files exist
+- Verify Dockerfiles reference correct paths
 
 ---
 
-**Last Updated:** December 23, 2025
-**Status:** Production - All services running on Google Cloud Run
+**Last Updated:** December 25, 2025  
+**Status:** ✅ Production - Deployed
