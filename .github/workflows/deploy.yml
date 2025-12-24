@@ -35,7 +35,7 @@ jobs:
       - name: Deploy Dashboard Frontend
         run: |
           gcloud run deploy dashboard-frontend \
-            --source services/dashboard-frontend \
+            --source . \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8000 \
@@ -51,7 +51,7 @@ jobs:
       - name: Deploy Dashboard API
         run: |
           gcloud run deploy dashboard-api \
-            --source services/dashboard-api \
+            --source . \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -66,7 +66,7 @@ jobs:
       - name: Deploy Generator Service
         run: |
           gcloud run deploy telemetry-generator \
-            --source services/generator \
+            --source . \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -81,7 +81,7 @@ jobs:
       - name: Deploy Ingestion Service
         run: |
           gcloud run deploy telemetry-ingestion \
-            --source services/ingestion \
+            --source . \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -96,7 +96,7 @@ jobs:
       - name: Deploy Transformer Service
         run: |
           gcloud run deploy telemetry-transformer \
-            --source services/transformer \
+            --source . \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8000 \

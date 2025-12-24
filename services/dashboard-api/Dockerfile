@@ -9,12 +9,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY requirements.txt .
+COPY services/dashboard-api/requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy everything (source includes only this service's directory when deployed with --source services/dashboard-api)
+# Copy entire project
 COPY . .
 
 # Expose port
@@ -25,4 +25,4 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
 # Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "services.dashboard_api.main:app", "--host", "0.0.0.0", "--port", "8080"]
