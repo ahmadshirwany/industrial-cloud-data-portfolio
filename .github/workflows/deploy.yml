@@ -78,7 +78,7 @@ jobs:
             --max-instances 3 \
             --timeout 300 \
             --startup-cpu-boost \
-            --set-env-vars PORT=8080,DB_HOST=${{ secrets.DB_HOST }},DB_NAME=${{ secrets.DB_NAME }},DB_USER=${{ secrets.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_PORT=${{ secrets.DB_PORT }} \
+            --set-env-vars PORT=8080,DB_HOST=${{ secrets.DB_HOST || 'localhost' }},DB_NAME=${{ secrets.DB_NAME || 'postgres' }},DB_USER=${{ secrets.DB_USER || 'postgres' }},DB_PASSWORD=${{ secrets.DB_PASSWORD || 'postgres' }},DB_PORT=${{ secrets.DB_PORT || '5432' }} \
             --quiet
 
       - name: Deploy Dashboard Frontend
@@ -143,7 +143,7 @@ jobs:
             --min-instances 1 \
             --max-instances 1 \
             --timeout 3600 \
-            --set-env-vars GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }},DB_HOST=${{ secrets.DB_HOST }},DB_NAME=${{ secrets.DB_NAME }},DB_USER=${{ secrets.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_PORT=${{ secrets.DB_PORT }} \
+            --set-env-vars GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }},DB_HOST=${{ secrets.DB_HOST || 'localhost' }},DB_NAME=${{ secrets.DB_NAME || 'postgres' }},DB_USER=${{ secrets.DB_USER || 'postgres' }},DB_PASSWORD=${{ secrets.DB_PASSWORD || 'postgres' }},DB_PORT=${{ secrets.DB_PORT || '5432' }} \
             --quiet
 
       - name: Get deployed service URLs
