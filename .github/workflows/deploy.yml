@@ -77,7 +77,7 @@ jobs:
             --min-instances 0 \
             --max-instances 3 \
             --timeout 300 \
-            --startup-cpu-boost \
+            --cpu-boost \
             --set-env-vars PORT=8080,DB_HOST=${{ secrets.DB_HOST || 'localhost' }},DB_NAME=${{ secrets.DB_NAME || 'postgres' }},DB_USER=${{ secrets.DB_USER || 'postgres' }},DB_PASSWORD=${{ secrets.DB_PASSWORD || 'postgres' }},DB_PORT=${{ secrets.DB_PORT || '5432' }} \
             --quiet
 
