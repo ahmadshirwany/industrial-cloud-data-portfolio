@@ -32,10 +32,31 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.REGISTRY }}
 
+      - name: Build and Push Docker Images
+        run: |
+          # Build all images from root context
+          docker build -f services/dashboard-api/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:latest .
+          docker build -f services/dashboard-frontend/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:latest .
+          docker build -f services/generator/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:latest .
+          docker build -f services/ingestion/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:latest .
+          docker build -f services/transformer/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:latest .
+          
+          # Push all images
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:latest
+
       - name: Deploy Dashboard API
         run: |
           gcloud run deploy dashboard-api \
-            --source services/dashboard-api \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -52,7 +73,7 @@ jobs:
         run: |
           API_URL=$(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)' 2>/dev/null || echo '')
           gcloud run deploy dashboard-frontend \
-            --source services/dashboard-frontend \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8000 \
@@ -68,7 +89,7 @@ jobs:
       - name: Deploy Generator Service
         run: |
           gcloud run deploy telemetry-generator \
-            --source services/generator \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -84,7 +105,7 @@ jobs:
       - name: Deploy Ingestion Service
         run: |
           gcloud run deploy telemetry-ingestion \
-            --source services/ingestion \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -100,7 +121,7 @@ jobs:
       - name: Deploy Transformer Service
         run: |
           gcloud run deploy telemetry-transformer \
-            --source services/transformer \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8000 \
