@@ -65,6 +65,8 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/transformer:latest
 
       - name: Deploy Dashboard API
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
         run: |
           gcloud run deploy dashboard-api \
             --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-api:${{ github.sha }} \
@@ -78,7 +80,8 @@ jobs:
             --max-instances 3 \
             --timeout 300 \
             --cpu-boost \
-            --set-env-vars DB_HOST=${{ secrets.DB_HOST || 'localhost' }},DB_NAME=${{ secrets.DB_NAME || 'postgres' }},DB_USER=${{ secrets.DB_USER || 'postgres' }},DB_PASSWORD=${{ secrets.DB_PASSWORD || 'postgres' }},DB_PORT=${{ secrets.DB_PORT || '5432' }} \
+            --update-env-vars DB_HOST=${{ secrets.DB_HOST || 'localhost' }},DB_NAME=${{ secrets.DB_NAME || 'postgres' }},DB_USER=${{ secrets.DB_USER || 'postgres' }},DB_PORT=${{ secrets.DB_PORT || '5432' }} \
+            --update-env-vars "DB_PASSWORD=${DB_PASSWORD}" \
             --quiet
 
       - name: Deploy Dashboard Frontend
@@ -131,6 +134,8 @@ jobs:
             --quiet
 
       - name: Deploy Transformer Service
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
         run: |
           gcloud run deploy telemetry-transformer \
             --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/transformer:${{ github.sha }} \
@@ -143,7 +148,8 @@ jobs:
             --min-instances 1 \
             --max-instances 1 \
             --timeout 3600 \
-            --set-env-vars GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }},DB_HOST=${{ secrets.DB_HOST || 'localhost' }},DB_NAME=${{ secrets.DB_NAME || 'postgres' }},DB_USER=${{ secrets.DB_USER || 'postgres' }},DB_PASSWORD=${{ secrets.DB_PASSWORD || 'postgres' }},DB_PORT=${{ secrets.DB_PORT || '5432' }} \
+            --update-env-vars GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }},DB_HOST=${{ secrets.DB_HOST || 'localhost' }},DB_NAME=${{ secrets.DB_NAME || 'postgres' }},DB_USER=${{ secrets.DB_USER || 'postgres' }},DB_PORT=${{ secrets.DB_PORT || '5432' }} \
+            --update-env-vars "DB_PASSWORD=${DB_PASSWORD}" \
             --quiet
 
       - name: Get deployed service URLs
