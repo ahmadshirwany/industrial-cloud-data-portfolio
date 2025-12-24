@@ -22,6 +22,7 @@ EXPOSE 8080
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
-# Run the application directly
-CMD ["python", "services/dashboard-api/main.py"]
+# Run the application directly - uvicorn will read PORT from environment
+CMD ["sh", "-c", "cd services/dashboard-api && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}"]
