@@ -8,8 +8,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy shared utilities and generator service
-COPY shared/ ./shared/
-COPY services/generator/ ./services/generator/
+COPY . .
 
 # Set Python path
 ENV PYTHONPATH=/app

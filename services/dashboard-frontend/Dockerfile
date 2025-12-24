@@ -3,13 +3,13 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy requirements
-COPY services/dashboard-frontend/requirements.txt .
+COPY requirements.txt .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application
-COPY services/dashboard-frontend/ .
+COPY . .
 
 # Expose port
 EXPOSE 8000

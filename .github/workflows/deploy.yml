@@ -35,7 +35,7 @@ jobs:
       - name: Deploy Dashboard Frontend
         run: |
           gcloud run deploy dashboard-frontend \
-            --source . \
+            --source services/dashboard-frontend \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8000 \
@@ -45,14 +45,13 @@ jobs:
             --min-instances 1 \
             --max-instances 3 \
             --timeout 3600 \
-            --dockerfile services/dashboard-frontend/Dockerfile \
             --set-env-vars API_BASE_URL=https://dashboard-api-$(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)' 2>/dev/null || echo 'pending') \
             --quiet
 
       - name: Deploy Dashboard API
         run: |
           gcloud run deploy dashboard-api \
-            --source . \
+            --source services/dashboard-api \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -62,13 +61,12 @@ jobs:
             --min-instances 1 \
             --max-instances 3 \
             --timeout 3600 \
-            --dockerfile services/dashboard-api/Dockerfile \
             --quiet
 
       - name: Deploy Generator Service
         run: |
           gcloud run deploy telemetry-generator \
-            --source . \
+            --source services/generator \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -78,13 +76,12 @@ jobs:
             --min-instances 1 \
             --max-instances 3 \
             --timeout 3600 \
-            --dockerfile services/generator/Dockerfile \
             --quiet
 
       - name: Deploy Ingestion Service
         run: |
           gcloud run deploy telemetry-ingestion \
-            --source . \
+            --source services/ingestion \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -94,13 +91,12 @@ jobs:
             --min-instances 1 \
             --max-instances 5 \
             --timeout 3600 \
-            --dockerfile services/ingestion/Dockerfile \
             --quiet
 
       - name: Deploy Transformer Service
         run: |
           gcloud run deploy telemetry-transformer \
-            --source . \
+            --source services/transformer \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8000 \
@@ -110,7 +106,6 @@ jobs:
             --min-instances 1 \
             --max-instances 1 \
             --timeout 3600 \
-            --dockerfile services/transformer/Dockerfile \
             --quiet
 
       - name: Get deployed service URLs

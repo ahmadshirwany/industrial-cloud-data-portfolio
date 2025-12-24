@@ -8,8 +8,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt psycopg2-binary
 
 # Copy shared utilities and transformer service
-COPY shared/ ./shared/
-COPY services/transformer/ ./services/transformer/
+COPY . .
 
 # Set Python path
 ENV PYTHONPATH=/app

@@ -8,8 +8,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy shared utilities and ingestion service
-COPY shared/ ./shared/
-COPY services/ingestion/ ./services/ingestion/
+COPY . .
 
 # Set Python path
 ENV PYTHONPATH=/app
