@@ -4,7 +4,7 @@ Database models for telemetry data
 """
 
 from sqlalchemy import Column, Integer, String, DECIMAL, TIMESTAMP, Float
-from services.dashboard_api.database import Base
+from database import Base
 
 
 class ServerMetrics(Base):

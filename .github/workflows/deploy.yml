@@ -32,22 +32,6 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.REGISTRY }}
 
-      - name: Deploy Dashboard Frontend
-        run: |
-          gcloud run deploy dashboard-frontend \
-            --source services/dashboard-frontend \
-            --region ${{ env.GCP_REGION }} \
-            --project ${{ env.GCP_PROJECT_ID }} \
-            --port 8000 \
-            --allow-unauthenticated \
-            --cpu 1 \
-            --memory 256Mi \
-            --min-instances 1 \
-            --max-instances 3 \
-            --timeout 3600 \
-            --set-env-vars API_BASE_URL=https://dashboard-api-$(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)' 2>/dev/null || echo 'pending') \
-            --quiet
-
       - name: Deploy Dashboard API
         run: |
           gcloud run deploy dashboard-api \
@@ -61,6 +45,24 @@ jobs:
             --min-instances 1 \
             --max-instances 3 \
             --timeout 3600 \
+            --set-env-vars DB_HOST=${{ secrets.DB_HOST }},DB_NAME=${{ secrets.DB_NAME }},DB_USER=${{ secrets.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_PORT=${{ secrets.DB_PORT }} \
+            --quiet
+
+      - name: Deploy Dashboard Frontend
+        run: |
+          API_URL=$(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)' 2>/dev/null || echo '')
+          gcloud run deploy dashboard-frontend \
+            --source services/dashboard-frontend \
+            --region ${{ env.GCP_REGION }} \
+            --project ${{ env.GCP_PROJECT_ID }} \
+            --port 8000 \
+            --allow-unauthenticated \
+            --cpu 1 \
+            --memory 256Mi \
+            --min-instances 1 \
+            --max-instances 3 \
+            --timeout 3600 \
+            --set-env-vars API_BASE_URL=${API_URL} \
             --quiet
 
       - name: Deploy Generator Service
@@ -76,6 +78,7 @@ jobs:
             --min-instances 1 \
             --max-instances 3 \
             --timeout 3600 \
+            --set-env-vars GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
             --quiet
 
       - name: Deploy Ingestion Service
@@ -91,6 +94,7 @@ jobs:
             --min-instances 1 \
             --max-instances 5 \
             --timeout 3600 \
+            --set-env-vars GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }} \
             --quiet
 
       - name: Deploy Transformer Service
@@ -106,6 +110,7 @@ jobs:
             --min-instances 1 \
             --max-instances 1 \
             --timeout 3600 \
+            --set-env-vars GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }},DB_HOST=${{ secrets.DB_HOST }},DB_NAME=${{ secrets.DB_NAME }},DB_USER=${{ secrets.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_PORT=${{ secrets.DB_PORT }} \
             --quiet
 
       - name: Get deployed service URLs

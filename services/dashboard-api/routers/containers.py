@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List
 
-from services.dashboard_api.database import get_db
-from services.dashboard_api.schemas import (
+from database import get_db
+from schemas import (
     ContainerMetricBase,
     ContainerHealthSummary
 )

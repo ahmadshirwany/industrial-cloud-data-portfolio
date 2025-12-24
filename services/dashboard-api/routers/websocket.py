@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 from typing import List
 
-from services.dashboard_api.database import get_db
+from database import get_db
 
 router = APIRouter()
 

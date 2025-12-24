@@ -1,0 +1,6 @@
+# Transformer Service Requirements
+google-cloud-pubsub>=2.18.0
+google-cloud-storage>=2.10.0
+flask>=2.3.0
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9

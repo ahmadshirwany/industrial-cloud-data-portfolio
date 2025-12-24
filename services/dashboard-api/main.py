@@ -9,9 +9,11 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Add service root to path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+# Add current directory to path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
 
+# Direct imports from current package
 from routers import servers, containers, services, websocket, analytics
 from database import engine, Base
 
@@ -85,10 +87,11 @@ if __name__ == "__main__":
     import uvicorn
     
     port = int(os.getenv("PORT", 8080))
+    # For module execution, we need to use the app object directly
     uvicorn.run(
-        "main:app",
+        app,
         host="0.0.0.0",
         port=port,
-        reload=True,
+        reload=False,
         log_level="info"
     )

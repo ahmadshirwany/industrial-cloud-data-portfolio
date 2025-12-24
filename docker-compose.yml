@@ -75,6 +75,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - PYTHONPATH=/app
       - DB_HOST=${DB_HOST}
       - DB_NAME=${DB_NAME:-postgres}
       - DB_USER=${DB_USER}
@@ -95,6 +96,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - PYTHONPATH=/app
       - API_BASE_URL=http://dashboard-api:8080
     restart: unless-stopped
     depends_on:

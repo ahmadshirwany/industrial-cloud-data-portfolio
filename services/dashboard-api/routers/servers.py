@@ -9,8 +9,8 @@ from sqlalchemy import func, text
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from services.dashboard_api.database import get_db
-from services.dashboard_api.schemas import (
+from database import get_db
+from schemas import (
     ServerMetricBase,
     ServerHealthSummary,
     ServerTrend
