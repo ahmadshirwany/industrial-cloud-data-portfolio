@@ -30,11 +30,8 @@ COPY services/dashboard-api/requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy shared utilities
-COPY shared/ ./shared/
-
-# Copy dashboard-api service
-COPY services/dashboard-api/ ./services/dashboard_api/
+# Copy everything from project root
+COPY . .
 
 # Expose port
 EXPOSE 8080
@@ -43,5 +40,5 @@ EXPOSE 8080
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
-# Run the application
+# Run the application - run from the project root so imports work
 CMD ["uvicorn", "services.dashboard_api.main:app", "--host", "0.0.0.0", "--port", "8080"]
