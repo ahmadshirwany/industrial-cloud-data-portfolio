@@ -10,7 +10,9 @@ on:
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_REGION: us-central1
-  REGISTRY: gcr.io
+  ARTIFACT_REGISTRY_REPO: telemetry-services
+  REGISTRY_LOCATION: us-central1
+  REGISTRY: us-central1-docker.pkg.dev
 
 jobs:
   deploy:
@@ -28,6 +30,15 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
 
+      - name: Create Artifact Registry Repository
+        continue-on-error: true
+        run: |
+          gcloud artifacts repositories create ${{ env.ARTIFACT_REGISTRY_REPO }} \
+            --repository-format=docker \
+            --location=${{ env.REGISTRY_LOCATION }} \
+            --project=${{ env.GCP_PROJECT_ID }} \
+            --description="Docker repository for telemetry services" || true
+
       - name: Configure Docker authentication
         run: |
           gcloud auth configure-docker ${{ env.REGISTRY }}
@@ -35,28 +46,28 @@ jobs:
       - name: Build and Push Docker Images
         run: |
           # Build all images from root context
-          docker build -f services/dashboard-api/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:latest .
-          docker build -f services/dashboard-frontend/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:latest .
-          docker build -f services/generator/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:latest .
-          docker build -f services/ingestion/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:latest .
-          docker build -f services/transformer/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:latest .
+          docker build -f services/dashboard-api/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-api:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-api:latest .
+          docker build -f services/dashboard-frontend/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-frontend:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-frontend:latest .
+          docker build -f services/generator/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/generator:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/generator:latest .
+          docker build -f services/ingestion/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/ingestion:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/ingestion:latest .
+          docker build -f services/transformer/Dockerfile -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/transformer:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/transformer:latest .
           
           # Push all images
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:latest
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:latest
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:latest
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:latest
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-api:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-api:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-frontend:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-frontend:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/generator:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/generator:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/ingestion:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/ingestion:latest
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/transformer:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/transformer:latest
 
       - name: Deploy Dashboard API
         run: |
           gcloud run deploy dashboard-api \
-            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-api:${{ github.sha }} \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-api:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -73,7 +84,7 @@ jobs:
         run: |
           API_URL=$(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)' 2>/dev/null || echo '')
           gcloud run deploy dashboard-frontend \
-            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/dashboard-frontend:${{ github.sha }} \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/dashboard-frontend:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8000 \
@@ -89,7 +100,7 @@ jobs:
       - name: Deploy Generator Service
         run: |
           gcloud run deploy telemetry-generator \
-            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/generator:${{ github.sha }} \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/generator:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -105,7 +116,7 @@ jobs:
       - name: Deploy Ingestion Service
         run: |
           gcloud run deploy telemetry-ingestion \
-            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/ingestion:${{ github.sha }} \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/ingestion:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8080 \
@@ -121,7 +132,7 @@ jobs:
       - name: Deploy Transformer Service
         run: |
           gcloud run deploy telemetry-transformer \
-            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/transformer:${{ github.sha }} \
+            --image ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/transformer:${{ github.sha }} \
             --region ${{ env.GCP_REGION }} \
             --project ${{ env.GCP_PROJECT_ID }} \
             --port 8000 \
