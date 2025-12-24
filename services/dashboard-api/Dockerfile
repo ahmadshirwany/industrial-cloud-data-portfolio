@@ -9,16 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY services/dashboard-api/requirements.txt .
+COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy shared utilities
-COPY shared/ ./shared/
-
-# Copy dashboard-api service
-COPY services/dashboard-api/ ./services/dashboard_api/
+# Copy application (when using --source, everything is in the build context)
+COPY . .
 
 # Expose port
 EXPOSE 8080
@@ -28,4 +25,4 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
 # Run the application
-CMD ["uvicorn", "services.dashboard_api.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
