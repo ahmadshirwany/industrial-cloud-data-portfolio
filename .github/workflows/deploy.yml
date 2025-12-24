@@ -116,15 +116,3 @@ jobs:
           echo "Frontend: $(gcloud run services describe dashboard-frontend --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)')" >> $GITHUB_STEP_SUMMARY
           echo "API: $(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)')" >> $GITHUB_STEP_SUMMARY
           echo "API Docs: $(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)')/docs" >> $GITHUB_STEP_SUMMARY
-
-      - name: Notify on failure
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '❌ Deployment to Cloud Run failed. Check the workflow logs for details.'
-            })
