@@ -9,11 +9,11 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# Add service root to path
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-from services.dashboard_api.routers import servers, containers, services, websocket, analytics
-from services.dashboard_api.database import engine, Base
+from routers import servers, containers, services, websocket, analytics
+from database import engine, Base
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

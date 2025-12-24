@@ -11,10 +11,10 @@ from fastapi.templating import Jinja2Templates
 app = FastAPI(title="Industrial Cloud Dashboard Frontend")
 
 # Mount static files (CSS, JS, etc.)
-app.mount("/static", StaticFiles(directory="services/dashboard-frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Setup Jinja2 templates
-templates = Jinja2Templates(directory="services/dashboard-frontend/templates")
+templates = Jinja2Templates(directory="templates")
 
 # Backend API base URL
 API_BASE_URL = os.getenv("API_BASE_URL", "http://dashboard-api:8080")
