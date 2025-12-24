@@ -77,7 +77,7 @@ docker-compose down
 
 ### Cloud Deployment
 
-Services are deployed to Google Cloud Run:
+Services are deployed to Google Cloud Run with automatic CI/CD:
 
 ```bash
 # Generator Service
@@ -95,6 +95,30 @@ https://dashboard-api-esne4epeha-uc.a.run.app
 # Dashboard Frontend
 https://dashboard-frontend-esne4epeha-uc.a.run.app
 ```
+
+#### Automatic Deployment (CI/CD)
+
+Every push to `main` or `develop` branch automatically deploys all services to Cloud Run.
+
+**Setup Instructions:** See [CICD_SETUP_GUIDE.md](CICD_SETUP_GUIDE.md)
+
+**Quick Start:**
+```bash
+# 1. Create GCP service account (run locally)
+export PROJECT_ID="industrial-cloud-data"
+gcloud iam service-accounts create github-actions-runner --display-name="GitHub Actions Runner"
+# ... (see full guide for complete setup)
+
+# 2. Add GitHub Secrets
+# Settings → Secrets and variables → Actions
+# - GCP_PROJECT_ID: your-project-id
+# - GCP_SA_KEY: (contents of service account JSON)
+
+# 3. Push code
+git push origin main
+```
+
+**Workflow status:** GitHub Actions tab → Deploy to Cloud Run
 
 ## Architecture
 

@@ -40,7 +40,7 @@ async def fetch_api(endpoint: str) -> dict:
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """Home page"""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request, "api_base_url": API_BASE_URL})
 
 
 @app.get("/dashboard", response_class=HTMLResponse)

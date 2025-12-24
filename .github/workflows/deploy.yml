@@ -1,0 +1,130 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: us-central1
+  REGISTRY: gcr.io
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          cli_version: "latest"
+
+      - name: Configure Docker authentication
+        run: |
+          gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      - name: Deploy Dashboard Frontend
+        run: |
+          gcloud run deploy dashboard-frontend \
+            --source services/dashboard-frontend \
+            --region ${{ env.GCP_REGION }} \
+            --project ${{ env.GCP_PROJECT_ID }} \
+            --port 8000 \
+            --allow-unauthenticated \
+            --cpu 1 \
+            --memory 256Mi \
+            --min-instances 1 \
+            --max-instances 3 \
+            --timeout 3600 \
+            --set-env-vars API_BASE_URL=https://dashboard-api-$(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)' 2>/dev/null || echo 'pending')/docs \
+            --quiet
+
+      - name: Deploy Dashboard API
+        run: |
+          gcloud run deploy dashboard-api \
+            --source services/dashboard-api \
+            --region ${{ env.GCP_REGION }} \
+            --project ${{ env.GCP_PROJECT_ID }} \
+            --port 8080 \
+            --allow-unauthenticated \
+            --cpu 1 \
+            --memory 512Mi \
+            --min-instances 1 \
+            --max-instances 3 \
+            --timeout 3600 \
+            --quiet
+
+      - name: Deploy Generator Service
+        run: |
+          gcloud run deploy telemetry-generator \
+            --source services/generator \
+            --region ${{ env.GCP_REGION }} \
+            --project ${{ env.GCP_PROJECT_ID }} \
+            --port 8080 \
+            --no-allow-unauthenticated \
+            --cpu 1 \
+            --memory 512Mi \
+            --min-instances 1 \
+            --max-instances 3 \
+            --timeout 3600 \
+            --quiet
+
+      - name: Deploy Ingestion Service
+        run: |
+          gcloud run deploy telemetry-ingestion \
+            --source services/ingestion \
+            --region ${{ env.GCP_REGION }} \
+            --project ${{ env.GCP_PROJECT_ID }} \
+            --port 8080 \
+            --no-allow-unauthenticated \
+            --cpu 1 \
+            --memory 512Mi \
+            --min-instances 1 \
+            --max-instances 5 \
+            --timeout 3600 \
+            --quiet
+
+      - name: Deploy Transformer Service
+        run: |
+          gcloud run deploy telemetry-transformer \
+            --source services/transformer \
+            --region ${{ env.GCP_REGION }} \
+            --project ${{ env.GCP_PROJECT_ID }} \
+            --port 8000 \
+            --no-allow-unauthenticated \
+            --cpu 1 \
+            --memory 512Mi \
+            --min-instances 1 \
+            --max-instances 1 \
+            --timeout 3600 \
+            --quiet
+
+      - name: Get deployed service URLs
+        if: success()
+        run: |
+          echo "📡 Deployment Complete! Service URLs:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Frontend: $(gcloud run services describe dashboard-frontend --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)')" >> $GITHUB_STEP_SUMMARY
+          echo "API: $(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)')" >> $GITHUB_STEP_SUMMARY
+          echo "API Docs: $(gcloud run services describe dashboard-api --region ${{ env.GCP_REGION }} --project ${{ env.GCP_PROJECT_ID }} --format='value(status.url)')/docs" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Deployment to Cloud Run failed. Check the workflow logs for details.'
+            })
