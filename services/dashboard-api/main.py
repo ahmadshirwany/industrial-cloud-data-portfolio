@@ -1,6 +1,7 @@
 """
 Dashboard API Microservice - Main Application
 FastAPI backend with WebSocket support for real-time telemetry dashboard
+Version: 1.0.1
 """
 
 import os
