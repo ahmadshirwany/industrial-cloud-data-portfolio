@@ -122,7 +122,7 @@ async def get_error_rate_trend(
 
 @router.get("/success-rate-gauge")
 async def get_success_rate_gauge(
-    minutes: int = Query(default=5, description="Time window in minutes"),
+    minutes: int = Query(default=30, description="Time window in minutes"),
     db: Session = Depends(get_db)
 ):
     """
@@ -195,7 +195,7 @@ async def get_service_instances(
         WITH latest AS (
             SELECT service_name, MAX(timestamp) as max_time
             FROM service_metrics
-            WHERE timestamp > NOW() - INTERVAL '5 minutes'
+            WHERE timestamp > NOW() - INTERVAL '30 minutes'
             GROUP BY service_name
         )
         SELECT 

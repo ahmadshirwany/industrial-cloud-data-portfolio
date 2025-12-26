@@ -21,7 +21,7 @@ router = APIRouter()
 
 @router.get("/health", response_model=ServerHealthSummary)
 async def get_server_health(
-    minutes: int = Query(default=5, description="Time window in minutes"),
+    minutes: int = Query(default=30, description="Time window in minutes"),
     db: Session = Depends(get_db)
 ):
     """
@@ -73,7 +73,7 @@ async def get_current_servers(
             s.disk_utilization,
             s.status
         FROM server_metrics s
-        WHERE s.timestamp > NOW() - INTERVAL '10 minutes'
+        WHERE s.timestamp > NOW() - INTERVAL '30 minutes'
         ORDER BY s.server_id, s.timestamp DESC
         LIMIT :limit
     """)
@@ -153,7 +153,7 @@ async def get_servers_by_region(
             AVG(memory_percent) as avg_memory,
             AVG(disk_utilization) as avg_disk
         FROM server_metrics
-        WHERE timestamp > NOW() - INTERVAL '5 minutes'
+        WHERE timestamp > NOW() - INTERVAL '30 minutes'
         GROUP BY region
         ORDER BY server_count DESC
     """)
@@ -184,7 +184,7 @@ async def get_top_cpu_servers(
         WITH latest AS (
             SELECT server_id, MAX(timestamp) as max_time
             FROM server_metrics
-            WHERE timestamp > NOW() - INTERVAL '5 minutes'
+            WHERE timestamp > NOW() - INTERVAL '30 minutes'
             GROUP BY server_id
         )
         SELECT 
@@ -224,7 +224,7 @@ async def get_disk_usage(
         WITH latest AS (
             SELECT server_id, MAX(timestamp) as max_time
             FROM server_metrics
-            WHERE timestamp > NOW() - INTERVAL '5 minutes'
+            WHERE timestamp > NOW() - INTERVAL '30 minutes'
             GROUP BY server_id
         )
         SELECT 

@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/health", response_model=ContainerHealthSummary)
 async def get_container_health(
-    minutes: int = Query(default=5, description="Time window in minutes"),
+    minutes: int = Query(default=30, description="Time window in minutes"),
     db: Session = Depends(get_db)
 ):
     """
@@ -67,7 +67,7 @@ async def get_current_containers(
             c.requests_per_sec,
             c.health
         FROM container_metrics c
-        WHERE c.timestamp > NOW() - INTERVAL '10 minutes'
+        WHERE c.timestamp > NOW() - INTERVAL '30 minutes'
         ORDER BY c.container_id, c.timestamp DESC
         LIMIT :limit
     """)
@@ -104,7 +104,7 @@ async def get_containers_by_service(
             SUM(restart_count) as total_restarts,
             COUNT(CASE WHEN health = 'healthy' THEN 1 END) as healthy_count
         FROM container_metrics
-        WHERE timestamp > NOW() - INTERVAL '5 minutes'
+        WHERE timestamp > NOW() - INTERVAL '30 minutes'
         GROUP BY service_name
         ORDER BY container_count DESC
     """)
@@ -137,7 +137,7 @@ async def get_high_memory_containers(
         WITH latest AS (
             SELECT container_id, MAX(timestamp) as max_time
             FROM container_metrics
-            WHERE timestamp > NOW() - INTERVAL '5 minutes'
+            WHERE timestamp > NOW() - INTERVAL '30 minutes'
             GROUP BY container_id
         )
         SELECT 

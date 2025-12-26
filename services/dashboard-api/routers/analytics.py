@@ -21,7 +21,7 @@ router = APIRouter()
 
 @router.get("/system-health", response_model=SystemHealthScore)
 async def get_system_health(
-    minutes: int = Query(default=5, description="Time window in minutes"),
+    minutes: int = Query(default=30, description="Time window in minutes"),
     db: Session = Depends(get_db)
 ):
     """
@@ -97,7 +97,7 @@ async def get_top_cpu_resources(
         WITH latest AS (
             SELECT server_id, MAX(timestamp) as max_time
             FROM server_metrics
-            WHERE timestamp > NOW() - INTERVAL '5 minutes'
+            WHERE timestamp > NOW() - INTERVAL '30 minutes'
             GROUP BY server_id
         )
         SELECT 
@@ -138,13 +138,13 @@ async def get_top_memory_resources(
         WITH server_memory AS (
             SELECT server_id, MAX(timestamp) as max_time
             FROM server_metrics
-            WHERE timestamp > NOW() - INTERVAL '5 minutes'
+            WHERE timestamp > NOW() - INTERVAL '30 minutes'
             GROUP BY server_id
         ),
         container_memory AS (
             SELECT container_id, MAX(timestamp) as max_time
             FROM container_metrics
-            WHERE timestamp > NOW() - INTERVAL '5 minutes'
+            WHERE timestamp > NOW() - INTERVAL '30 minutes'
             GROUP BY container_id
         ),
         servers AS (
@@ -395,7 +395,7 @@ async def get_regional_summary(
             AVG(disk_utilization) as avg_disk,
             COUNT(CASE WHEN status = 'critical' THEN 1 END) as critical_count
         FROM server_metrics
-        WHERE timestamp > NOW() - INTERVAL '5 minutes'
+        WHERE timestamp > NOW() - INTERVAL '30 minutes'
         GROUP BY region
         ORDER BY server_count DESC
     """)

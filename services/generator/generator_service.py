@@ -18,8 +18,8 @@ class TelemetryGeneratorService:
         self.services = ["API", "DB", "Cache"]  # Reduced from 4 to 3
         self.regions = ["us-east-1"]  # Single region (consolidated)
         self.environments = ["production"]  # Only production (staging less critical)
-        self.servers = [f"server-{i:02d}" for i in range(1, 3)]  # Reduced from 3 to 2
-        self.containers = [f"container-{i:02d}" for i in range(1, 11)]  # 10 unique containers for variety
+        self.servers = [f"server-{i:02d}" for i in range(1, 11)]  # 10 servers for better visualization
+        self.containers = [f"container-{i:02d}" for i in range(1, 21)]  # 20 unique containers for variety
         self.service_versions = ["v2.0.0"]  # Single version
         
         self.generated_count = 0

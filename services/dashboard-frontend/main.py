@@ -48,10 +48,10 @@ async def dashboard(request: Request):
     """Main dashboard page"""
     try:
         # Fetch system health and daily stats
-        health = await fetch_api("/api/analytics/system-health?minutes=5")
+        health = await fetch_api("/api/analytics/system-health?minutes=30")
         stats = await fetch_api("/api/analytics/daily-stats")
-        servers = await fetch_api("/api/servers/health?minutes=5")
-        containers = await fetch_api("/api/containers/health?minutes=5")
+        servers = await fetch_api("/api/servers/health?minutes=30")
+        containers = await fetch_api("/api/containers/health?minutes=30")
         
         return templates.TemplateResponse(
             "dashboard.html",
@@ -90,7 +90,7 @@ async def servers_page(request: Request):
     """Servers monitoring page"""
     try:
         servers = await fetch_api("/api/servers/current?limit=10")
-        health = await fetch_api("/api/servers/health?minutes=5")
+        health = await fetch_api("/api/servers/health?minutes=30")
         
         return templates.TemplateResponse(
             "servers.html",
@@ -113,7 +113,7 @@ async def containers_page(request: Request):
     """Containers monitoring page"""
     try:
         containers = await fetch_api("/api/containers/current?limit=10")
-        health = await fetch_api("/api/containers/health?minutes=5")
+        health = await fetch_api("/api/containers/health?minutes=30")
         
         return templates.TemplateResponse(
             "containers.html",
@@ -208,7 +208,7 @@ async def service_trends(hours: int = 6):
 @app.get("/api/health-card", response_class=HTMLResponse)
 async def health_card(request: Request):
     """HTMX endpoint for health card updates"""
-    health = await fetch_api("/api/analytics/system-health?minutes=5")
+    health = await fetch_api("/api/analytics/system-health?minutes=30")
     return templates.TemplateResponse(
         "components/health_card.html",
         {"request": request, "health": health}
