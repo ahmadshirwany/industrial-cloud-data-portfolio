@@ -4,11 +4,11 @@ A production-ready cloud data pipeline with real-time monitoring dashboard, micr
 
 ## 🌐 Live Deployment
 
-**Dashboard Frontend:** https://dashboard-frontend-<project-id>-uc.a.run.app  
-**Dashboard API:** https://dashboard-api-<project-id>-uc.a.run.app  
-**API Documentation:** https://dashboard-api-<project-id>-uc.a.run.app/docs
+**Dashboard Frontend:** https://dashboard-frontend-965332869914.us-central1.run.app  
+**Dashboard API:** https://dashboard-api-965332869914.us-central1.run.app  
+**API Documentation:** https://dashboard-api-965332869914.us-central1.run.app/docs
 
-> Replace `<project-id>` with your GCP project ID. Services are deployed automatically via GitHub Actions on push to `main` branch.
+> Services are deployed automatically via GitHub Actions on push to `main` branch.
 
 ## Overview
 
