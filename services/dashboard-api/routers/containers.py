@@ -26,15 +26,25 @@ async def get_container_health(
     Get container health summary
     """
     query = text(f"""
+        WITH latest_containers AS (
+            SELECT DISTINCT ON (container_id)
+                container_id,
+                health,
+                memory_utilization,
+                restart_count,
+                timestamp
+            FROM container_metrics
+            WHERE timestamp > NOW() - INTERVAL '{minutes} minutes'
+            ORDER BY container_id, timestamp DESC
+        )
         SELECT 
-            COUNT(DISTINCT container_id) as total_containers,
-            COUNT(DISTINCT CASE WHEN health = 'healthy' THEN container_id END) as healthy_containers,
-            COUNT(DISTINCT CASE WHEN health = 'degraded' THEN container_id END) as degraded_containers,
-            COUNT(DISTINCT CASE WHEN health = 'unhealthy' THEN container_id END) as unhealthy_containers,
+            COUNT(container_id) as total_containers,
+            COUNT(CASE WHEN health = 'healthy' THEN 1 END) as healthy_containers,
+            COUNT(CASE WHEN health = 'degraded' THEN 1 END) as degraded_containers,
+            COUNT(CASE WHEN health = 'unhealthy' THEN 1 END) as unhealthy_containers,
             AVG(memory_utilization) as avg_memory_utilization,
             SUM(restart_count) as total_restarts
-        FROM container_metrics
-        WHERE timestamp > NOW() - INTERVAL '{minutes} minutes'
+        FROM latest_containers
     """)
     
     result = db.execute(query).fetchone()

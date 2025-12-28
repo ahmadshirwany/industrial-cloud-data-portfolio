@@ -89,7 +89,7 @@ async def profile_page(request: Request):
 async def servers_page(request: Request):
     """Servers monitoring page"""
     try:
-        servers = await fetch_api("/api/servers/current?limit=10")
+        servers = await fetch_api("/api/servers/current?limit=50")
         health = await fetch_api("/api/servers/health?minutes=30")
         
         return templates.TemplateResponse(
@@ -112,7 +112,7 @@ async def servers_page(request: Request):
 async def containers_page(request: Request):
     """Containers monitoring page"""
     try:
-        containers = await fetch_api("/api/containers/current?limit=10")
+        containers = await fetch_api("/api/containers/current?limit=50")
         health = await fetch_api("/api/containers/health?minutes=30")
         
         return templates.TemplateResponse(
@@ -218,7 +218,7 @@ async def health_card(request: Request):
 @app.get("/api/servers-table", response_class=HTMLResponse)
 async def servers_table(request: Request):
     """HTMX endpoint for servers table updates"""
-    response = await fetch_api("/api/servers/current?limit=10")
+    response = await fetch_api("/api/servers/current?limit=50")
     
     # Handle both list and dict responses
     if isinstance(response, dict) and 'value' in response:
@@ -266,7 +266,7 @@ async def servers_table(request: Request):
 @app.get("/api/containers-table", response_class=HTMLResponse)
 async def containers_table(request: Request):
     """HTMX endpoint for containers table updates"""
-    containers = await fetch_api("/api/containers/current?limit=10")
+    containers = await fetch_api("/api/containers/current?limit=50")
     return templates.TemplateResponse(
         "components/containers_table.html",
         {"request": request, "containers": containers}

@@ -29,16 +29,27 @@ async def get_server_health(
     Returns counts by status and average resource usage
     """
     query = text(f"""
+        WITH latest_servers AS (
+            SELECT DISTINCT ON (server_id)
+                server_id,
+                status,
+                cpu_percent,
+                memory_percent,
+                disk_utilization,
+                timestamp
+            FROM server_metrics
+            WHERE timestamp > NOW() - INTERVAL '{minutes} minutes'
+            ORDER BY server_id, timestamp DESC
+        )
         SELECT 
-            COUNT(DISTINCT server_id) as total_servers,
-            COUNT(DISTINCT CASE WHEN status = 'healthy' THEN server_id END) as healthy_servers,
-            COUNT(DISTINCT CASE WHEN status = 'warning' THEN server_id END) as warning_servers,
-            COUNT(DISTINCT CASE WHEN status = 'critical' THEN server_id END) as critical_servers,
+            COUNT(server_id) as total_servers,
+            COUNT(CASE WHEN status = 'healthy' THEN 1 END) as healthy_servers,
+            COUNT(CASE WHEN status = 'warning' THEN 1 END) as warning_servers,
+            COUNT(CASE WHEN status = 'critical' THEN 1 END) as critical_servers,
             AVG(cpu_percent) as avg_cpu,
             AVG(memory_percent) as avg_memory,
             AVG(disk_utilization) as avg_disk
-        FROM server_metrics
-        WHERE timestamp > NOW() - INTERVAL '{minutes} minutes'
+        FROM latest_servers
     """)
     
     result = db.execute(query).fetchone()
